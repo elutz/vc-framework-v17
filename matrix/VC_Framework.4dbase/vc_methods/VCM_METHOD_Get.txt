@@ -1,0 +1,32 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Method Export","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 03/16/11, 18:09:57
+  // ----------------------------------------------------
+  // Description:
+  //   Given a Design Object Access method path, get the
+  //   method content.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$methodPath_t)
+C_POINTER($2;$fileContent_t_p)
+
+C_LONGINT($0;$error_l)
+
+C_TEXT($currentMethodBody_t)
+
+$methodPath_t:=$1
+$fileContent_t_p:=$2
+
+UTIL_ERR_HandlerInstall 
+METHOD GET CODE($methodPath_t;$currentMethodBody_t;*)  // Pass the * to indicate it's a host method.
+$error_l:=UTIL_ERR_HandlerRemove 
+
+If ($error_l=0)
+	$fileContent_t_p->:=$currentMethodBody_t
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

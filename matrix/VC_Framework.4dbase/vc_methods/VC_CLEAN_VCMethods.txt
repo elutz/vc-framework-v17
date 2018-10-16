@@ -1,0 +1,133 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/11/14, 11:25:54
+  // ----------------------------------------------------
+  // Description:
+  //   Previous versions used a table called "VC_Methods".
+  //
+  //   Now using a more generic table named "VC_Assets".
+  //
+  //   This code will preserve previous data and delete
+  //   "VC_Methods" if it still exists.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+C_LONGINT($vcMethodsExists_l)
+C_TEXT($currentMethodPath_t;$currentMethodType_t;$currentMethodAction_t;$currentMethodState_t)
+C_LONGINT($currentMethod_l;$numMethods_l)
+
+C_TEXT($progTitle_t)
+C_LONGINT($progID_l;$progThreshold_l)
+C_REAL($progress_r)
+
+ARRAY TEXT($methodPaths_at;0)
+ARRAY TEXT($methodActions_at;0)
+ARRAY TEXT($methodStates_at;0)
+
+$error_l:=VC_EXT_Open 
+
+  // See if VC_Methods exists.
+If ($error_l=0)
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		SELECT COUNT( TABLE_ID )
+		FROM _USER_TABLES
+		WHERE TABLE_NAME = 'VC_Methods'
+		INTO :$vcMethodsExists_l;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+
+  // Get any existing data from VC_Methods.
+If (($error_l=0) & ($vcMethodsExists_l>0))
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		SELECT methodPath, action, state
+		FROM VC_Methods
+		INTO :$methodPaths_at, :$methodActions_at, :$methodStates_at;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+	
+	
+	  // Copy the data to VC_Assets.
+	If ($error_l=0)
+		
+		$numMethods_l:=Size of array($methodPaths_at)
+		
+		If ($numMethods_l>0)
+			
+			$currentMethod_l:=1
+			
+			  // Create a progress bar in case things are slow.
+			If (VC_ProgInstalled_f & (<>VC_Quit_f=False))
+				$progTitle_t:=<>VC_ComponentName_t+" migrating old method metadata"
+				$progThreshold_l:=1000
+				$progID_l:=PROG_Create ($progTitle_t;$numMethods_l;$progThreshold_l)
+			End if 
+			
+			While (($currentMethod_l<=$numMethods_l) & ($error_l=0))
+				
+				$currentMethodPath_t:=$methodPaths_at{$currentMethod_l}
+				$currentMethodType_t:=<>VC_TYPE_Method_t
+				$currentMethodAction_t:=$methodActions_at{$currentMethod_l}
+				$currentMethodState_t:=$methodStates_at{$currentMethod_l}
+				
+				  // Update progress bar.
+				If (VC_ProgInstalled_f & (<>VC_Quit_f=False))
+					$progress_r:=$currentMethod_l/$numMethods_l
+					PROG_Update ($progID_l;$progress_r;$currentMethod_l;$numMethods_l;$currentMethodPath_t)
+				End if 
+				
+				UTIL_ERR_HandlerInstall 
+				Begin SQL
+					INSERT INTO VC_Assets
+					(
+					   path,
+					   type,
+					   action,
+					   state
+					)
+					VALUES
+					(
+					   :$currentMethodPath_t,
+					   :$currentMethodType_t,
+					   :$currentMethodAction_t,
+					   :$currentMethodState_t
+					);
+				End SQL
+				$error_l:=UTIL_ERR_HandlerRemove 
+				
+				If ($error_l=0)
+					$currentMethod_l:=$currentMethod_l+1
+				End if 
+				
+			End while 
+			
+		End if 
+		
+	End if 
+	
+	
+	  // Remove the VC_Methods table.
+	If ($error_l=0)
+		UTIL_ERR_HandlerInstall 
+		Begin SQL
+			DROP TABLE IF EXISTS VC_Methods;
+		End SQL
+		$error_l:=UTIL_ERR_HandlerRemove 
+	End if 
+	
+End if 
+
+
+$error_l:=VC_EXT_Close ($error_l)
+
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+
+$0:=$error_l

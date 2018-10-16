@@ -1,0 +1,69 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/11/12, 17:56:33
+  // ----------------------------------------------------
+  // Description:
+  //   Delete all records from the assets table.
+  //
+  //   Optionally specify a specific asset type.
+  // --[HEADEREND]---------------------------------------
+C_POINTER($1;$assetTypes_at_p)  // Optional
+
+C_LONGINT($0;$error_l)
+
+C_TEXT($currentTypeToDelete_t;$statement_t)
+C_LONGINT($i;$numTypes_l)
+
+ARRAY TEXT($typesToDelete_at;0)
+
+If (Count parameters>=1)
+	$assetTypes_at_p:=$1
+	COPY ARRAY($assetTypes_at_p->;$typesToDelete_at)
+Else 
+	APPEND TO ARRAY($typesToDelete_at;<>VC_TYPE_Form_t)
+	APPEND TO ARRAY($typesToDelete_at;<>VC_TYPE_Method_t)
+End if 
+
+
+  // Open external database.
+If ($error_l=0)
+	$error_l:=VC_EXT_Open 
+End if 
+
+
+  // Delete requested assets.
+If ($error_l=0)
+	$numTypes_l:=Size of array($typesToDelete_at)
+	
+	$statement_t:=""
+	$statement_t:=$statement_t+"DELETE "
+	$statement_t:=$statement_t+"FROM VC_Assets "
+	$statement_t:=$statement_t+"WHERE "
+	For ($i;1;$numTypes_l)
+		$currentTypeToDelete_t:=$typesToDelete_at{$i}
+		If ($i#1)
+			$statement_t:=$statement_t+"OR "
+		End if 
+		$statement_t:=$statement_t+" type = '"+$currentTypeToDelete_t+"' "
+	End for 
+	$statement_t:=$statement_t+"; "
+	
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		EXECUTE IMMEDIATE :$statement_t;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

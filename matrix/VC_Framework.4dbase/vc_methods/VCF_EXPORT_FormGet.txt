@@ -1,0 +1,107 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/07/14, 16:03:07
+  // ----------------------------------------------------
+  // Description:
+  //   Find all forms that have been changed since the
+  //   last stamp.
+  //
+  //   Limitation: there's no way to get every changed
+  //   form in a single call to FORM GET NAMES. You have
+  //   to call it once for each table, and once more for
+  //   project forms.
+  //
+  //   This means that when you start calling you'll have
+  //   one output stamp and by the time you stop calling
+  //   you may have another output stamp.
+  //
+  //   If the user changed a form while this code is
+  //   running, and you used the final output stamp as
+  //   the next input stamp, it's possible that change
+  //   could be missed.
+  //
+  //   I could track the stamps per-table but that's a
+  //   lot more overheard and code complexity.
+  //
+  //   Instead I decided return the minimum new stamp; it
+  //   means I might export the same form more than once
+  //   but if the content of the text file doesn't change,
+  //   who cares?
+  //
+  //   This way I only have one number to keep track of
+  //   and no changes are missed.
+  // --[HEADEREND]---------------------------------------
+C_POINTER($1;$currentFormStamp_p_l)
+C_POINTER($2;$formsToSave_p_at)
+C_POINTER($3;$formTableNums_p_al)
+
+C_LONGINT($0;$error_l)
+
+C_LONGINT($filterStamp_l;$targetCurrentFormStamp_l)
+C_LONGINT($i;$numTables_l;$currentTable_l)
+C_LONGINT($j;$numForms_l)
+C_POINTER($currentTable_p)
+
+ARRAY LONGINT($tablesInDatabase_al;0)
+
+ARRAY TEXT($formNames_at;0)
+
+$currentFormStamp_p_l:=$1
+$formsToSave_p_at:=$2
+$formTableNums_p_al:=$3
+
+  // Get table numbers for all the tables in the database.
+UTIL_ERR_HandlerInstall 
+Begin SQL
+	select TABLE_ID
+	from _USER_TABLES
+	INTO :$tablesInDatabase_al;
+End SQL
+$error_l:=UTIL_ERR_HandlerRemove 
+
+If ($error_l=0)
+	
+	$numTables_l:=Size of array($tablesInDatabase_al)
+	$i:=0  // Start from 0; 0 means Project forms.
+	
+	For ($i;0;$numTables_l)
+		  // Make sure to use this same value for each table.  I.e.
+		  // the output of each call to FORM GET NAMES may be a new
+		  // stamp, don't use that as the input for the next call.
+		$filterStamp_l:=$currentFormStamp_p_l->
+		
+		If ($i#0)
+			  // Table forms.
+			$currentTable_l:=$tablesInDatabase_al{$i}
+			$currentTable_p:=Table($currentTable_l)
+			FORM GET NAMES($currentTable_p->;$formNames_at;"";$filterStamp_l;*)
+		Else 
+			$currentTable_l:=0
+			  // Project forms.
+			FORM GET NAMES($formNames_at;"";$filterStamp_l;*)
+			  // This is the first call to FORM GET NAMES; save this output stamp, we will return this.
+			$targetCurrentFormStamp_l:=$filterStamp_l
+		End if 
+		
+		
+		$numForms_l:=Size of array($formNames_at)
+		
+		For ($j;1;$numForms_l)
+			  // Add the forms to the list:
+			APPEND TO ARRAY($formsToSave_p_at->;$formNames_at{$j})
+			APPEND TO ARRAY($formTableNums_p_al->;$currentTable_l)
+		End for 
+		
+	End for 
+	
+	
+	  // Finally return the minimum output stamp value.
+	$currentFormStamp_p_l->:=$targetCurrentFormStamp_l
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

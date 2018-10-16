@@ -1,0 +1,21 @@
+﻿  //%attributes = {"invisible":true,"executedOnServer":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 06/23/14, 14:33:08
+  // ----------------------------------------------------
+  // Description:
+  //   Figure out if VC_Framework is ready to go or not.
+  //
+  //   Why a method? This needs to run on the server
+  //   because the client code needs to know if the
+  //   server is ready.
+  //
+  //   Note: this doesn't currently test <>VC_ERROR_F. I
+  //   suspect it's not important if VC_Framework has an
+  //   error because those errors only affect the
+  //   VC_Framework processes. The dependent components
+  //   only care if the external data file is ready.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($0;<>VC_Enabled_f)
+
+$0:=<>VC_Enabled_f

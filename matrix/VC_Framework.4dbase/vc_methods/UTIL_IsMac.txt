@@ -1,0 +1,21 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 05/25/12, 17:38:41
+  // ----------------------------------------------------
+  // Description:
+  //   Test to see if this is Mac or Windows.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($0;$isMac_f)
+
+C_LONGINT($platform_l)
+
+_O_PLATFORM PROPERTIES($platform_l)
+
+If ($platform_l=Mac OS)
+	$isMac_f:=True
+Else 
+	$isMac_f:=False
+End if 
+
+$0:=$isMac_f

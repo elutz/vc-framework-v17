@@ -1,0 +1,2 @@
+﻿  //%attributes = {"lang":"en"} comment added and reserved by 4D.
+OPEN URL("http://kb.4d.com/assetid=76619")

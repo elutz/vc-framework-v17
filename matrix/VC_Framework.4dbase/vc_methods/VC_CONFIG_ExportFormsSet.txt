@@ -1,0 +1,22 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/28/14, 11:33:44
+  // ----------------------------------------------------
+  // Description:
+  //   Enable or disable form export.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($1;$exportForms_f)
+
+C_LONGINT($error_l)
+
+$exportForms_f:=$1
+
+$error_l:=VC_EXT_PrefSet (<>VC_LABEL_ExportForms_t;String($exportForms_f))
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+Else 
+	  // Make sure to update IP var.
+	<>VC_ExportForms_f:=$exportForms_f
+End if 

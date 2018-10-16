@@ -1,0 +1,92 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/10/14, 17:36:17
+  // ----------------------------------------------------
+  // Description:
+  //   Startup code for the methods module.
+  //
+  //   Should only be called by VC_STARTUP_Process.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+C_TEXT($methodsRootFolderName_t;$methodsRootFolderPath_t)
+
+VCM_STARTUP_SetKeyNames 
+
+  // ===================================================================================
+  // Global variables, used throughout the module.
+
+  // See VCM_UTIL_DetectUnnamedError
+C_BOOLEAN(<>VCM_ERR_UnnamedErrorDetected_f)
+
+
+  // ===================================================================================
+  // Global variables where the value is actually data.
+  // This value is actually stored in the data but as an
+  // optimization I can access the IP var instead of going
+  // to the data file every time (e.g. in a loop).  The
+  // setter for this value also updates the IP var.
+
+  // METHOD GET PATHS performance threshold
+C_LONGINT(<>VCM_MGPThreshold_l)
+
+  // Flag to check if the user wants to ignore slow MGP or not.
+C_BOOLEAN(<>VCM_DeleteIgnore_f)
+
+  // Flag to check and see if the user wants to only run delete code if something has changed.
+C_BOOLEAN(<>VCM_DeleteOnChange_f)
+
+
+  // ===================================================================================
+  // These global vars should only be set once per session.
+  // I.e. they're "constants", the value should never change.
+
+  // These are used to set up the global constant vars.
+$methodsRootFolderName_t:="vc_methods"
+$methodsRootFolderPath_t:=Get 4D folder(Database folder;*)+$methodsRootFolderName_t
+
+  // Design Object Access paths are all POSIX compliant (thus need to be converted to System).
+  // However they are also relative paths.  The "Convert path POSIX to system" command
+  // requires absolute paths.  I.e. I need the method root path to be POSIX for further
+  // usage.
+  // Furthmore Design Object Access paths are encoded (so pass the *).
+C_TEXT(<>VCM_ROOT_POSIX_T)
+<>VCM_ROOT_POSIX_T:=Convert path system to POSIX($methodsRootFolderPath_t;*)
+
+
+  // ===================================================================================
+  // Set up the external database.
+
+  // Set the initial stamp values, but don't overwrite if they already exist.
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VCM_LABEL_Stamp_t;"0";False)
+End if 
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VCM_LABEL_StampImport_t;"0";False)
+End if 
+
+
+  // ===================================================================================
+  // Set up default process parameters - these ones have a corresponding IP var.
+
+  // Set default value for METHOD GET PATHS performance threshold.
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VC_LABEL_DeleteMGPThreshold_t;"100";False)
+End if 
+
+  // Set default value for ignoring the performance of MGP.
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VC_LABEL_DeleteIgnoreSlow_t;"False";False)
+End if 
+
+  // Set default value for only running delete check when a code change is made.
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VC_LABEL_DeleteOnChange_t;"False";False)
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

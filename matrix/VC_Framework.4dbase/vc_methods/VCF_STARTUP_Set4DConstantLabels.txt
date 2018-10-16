@@ -1,0 +1,255 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 06/27/14, 15:31:50
+  // ----------------------------------------------------
+  // Description:
+  //   This is just a convenient way to transform 4D's
+  //   constant names into text. Use the value to look up
+  //   the name.
+  //
+  //   TODO: Note it's not localized at all.  What I
+  //   probably should be doing is looking up the
+  //   constant in the XLIFF.
+  // --[HEADEREND]---------------------------------------
+
+ARRAY TEXT(<>VCF_BorderLineStyles_at;6)
+
+<>VCF_BorderLineStyles_at{Border None}:="Border None"
+<>VCF_BorderLineStyles_at{Border Plain}:="Border Plain"
+<>VCF_BorderLineStyles_at{Border Dotted}:="Border Dotted"
+<>VCF_BorderLineStyles_at{Border Raised}:="Border Raised"
+<>VCF_BorderLineStyles_at{Border Sunken}:="Border Sunken"
+<>VCF_BorderLineStyles_at{Border Double}:="Border Double"
+<>VCF_BorderLineStyles_at{Border System}:="Border System"
+
+
+ARRAY TEXT(<>VCF_FormEvents_at;59)
+
+<>VCF_FormEvents_at{On Load}:="On Load"
+<>VCF_FormEvents_at{On Validate}:="On Validate"
+<>VCF_FormEvents_at{On Clicked}:="On Clicked"
+<>VCF_FormEvents_at{On Header}:="On Header"
+<>VCF_FormEvents_at{On Printing Break}:="On Printing Break"
+<>VCF_FormEvents_at{On Printing Footer}:="On Printing Footer"
+<>VCF_FormEvents_at{On Display Detail}:="On Display Detail"
+<>VCF_FormEvents_at{On Outside Call}:="On Outside Call"
+<>VCF_FormEvents_at{On Activate}:="On Activate"
+<>VCF_FormEvents_at{On Deactivate}:="On Deactivate"
+<>VCF_FormEvents_at{On Double Clicked}:="On Double Clicked"
+<>VCF_FormEvents_at{On Losing Focus}:="On Losing Focus"
+<>VCF_FormEvents_at{On Getting Focus}:="On Getting Focus"
+<>VCF_FormEvents_at{On Drop}:="On Drop"
+<>VCF_FormEvents_at{On Before Keystroke}:="On Before Keystroke"
+<>VCF_FormEvents_at{On Menu Selected}:="On Menu Selected"
+<>VCF_FormEvents_at{On Plug in Area}:="On Plug in Area"
+<>VCF_FormEvents_at{On Data Change}:="On Data Change"
+<>VCF_FormEvents_at{On Drag Over}:="On Drag Over"
+<>VCF_FormEvents_at{On Close Box}:="On Close Box"
+<>VCF_FormEvents_at{On Printing Detail}:="On Printing Detail"
+<>VCF_FormEvents_at{On Unload}:="On Unload"
+<>VCF_FormEvents_at{On Open Detail}:="On Open Detail"
+<>VCF_FormEvents_at{On Close Detail}:="On Close Detail"
+<>VCF_FormEvents_at{On Timer}:="On Timer"
+<>VCF_FormEvents_at{On After Keystroke}:="On After Keystroke"
+<>VCF_FormEvents_at{On Resize}:="On Resize"
+<>VCF_FormEvents_at{On After Sort}:="On After Sort"
+<>VCF_FormEvents_at{On Selection Change}:="On Selection Change"
+<>VCF_FormEvents_at{On Column Moved}:="On Column Moved"
+<>VCF_FormEvents_at{On Column Resize}:="On Column Resize"
+<>VCF_FormEvents_at{On Row Moved}:="On Row Moved"
+<>VCF_FormEvents_at{On Mouse Enter}:="On Mouse Enter"
+<>VCF_FormEvents_at{On Mouse Leave}:="On Mouse Leave"
+<>VCF_FormEvents_at{On Mouse Move}:="On Mouse Move"
+<>VCF_FormEvents_at{On Alternative Click}:="On Arrow Click"
+<>VCF_FormEvents_at{On Long Click}:="On Long Click"
+<>VCF_FormEvents_at{On Load Record}:="On Load Record"
+<>VCF_FormEvents_at{On Before Data Entry}:="On Before Data Entry"
+<>VCF_FormEvents_at{On Header Click}:="On Header Click"
+<>VCF_FormEvents_at{On Expand}:="On Expand"
+<>VCF_FormEvents_at{On Collapse}:="On Collapse"
+<>VCF_FormEvents_at{On After Edit}:="On After Edit"
+<>VCF_FormEvents_at{On Begin Drag Over}:="On Begin Drag Over"
+<>VCF_FormEvents_at{On Begin URL Loading}:="On Begin URL Loading"
+<>VCF_FormEvents_at{On URL Resource Loading}:="On URL Resource Loading"
+<>VCF_FormEvents_at{On End URL Loading}:="On End URL Loading"
+<>VCF_FormEvents_at{On URL Loading Error}:="On URL Loading Error"
+<>VCF_FormEvents_at{On URL Filtering}:="On URL Filtering"
+<>VCF_FormEvents_at{On Open External Link}:="On Open External Link"
+<>VCF_FormEvents_at{On Window Opening Denied}:="On Window Opening Denied"
+<>VCF_FormEvents_at{On Bound Variable Change}:="On bound variable change"
+<>VCF_FormEvents_at{_o_On Mac Toolbar Button}:="On Mac toolbar button"
+<>VCF_FormEvents_at{On Page Change}:="On Page Change"
+<>VCF_FormEvents_at{On Footer Click}:="On Footer Click"
+<>VCF_FormEvents_at{On Delete Action}:="On Delete Action"
+<>VCF_FormEvents_at{On Scroll}:="On Picture Scroll"
+
+
+ARRAY TEXT(<>VCF_HorizontalAlign_at;4)
+
+<>VCF_HorizontalAlign_at{Align default}:="Align default"
+<>VCF_HorizontalAlign_at{Align left}:="Align left"
+<>VCF_HorizontalAlign_at{Align center}:="Align center"
+<>VCF_HorizontalAlign_at{Align right}:="Align right"
+
+
+ARRAY TEXT(<>VCF_IndicatorType_at;3)
+
+<>VCF_IndicatorType_at{Progress bar}:="Progress bar"
+<>VCF_IndicatorType_at{Barber shop}:="Barber shop"
+<>VCF_IndicatorType_at{Asynchronous progress bar}:="Asynchronous progress bar"
+
+
+ARRAY TEXT(<>VCF_ObjectActions_at;40)
+
+<>VCF_ObjectActions_at{Num(_o_Object No standard action)}:="Object No standard action"
+<>VCF_ObjectActions_at{Num(_o_Object Cancel action)}:="Object Cancel action"
+<>VCF_ObjectActions_at{Num(_o_Object Accept action)}:="Object Accept action"
+<>VCF_ObjectActions_at{Num(_o_Object Next record action)}:="Object Next record action"
+<>VCF_ObjectActions_at{Num(_o_Object Previous record action)}:="Object Previous record action"
+<>VCF_ObjectActions_at{Num(_o_Object First record action)}:="Object First record action"
+<>VCF_ObjectActions_at{Num(_o_Object Last record action)}:="Object Last record action"
+<>VCF_ObjectActions_at{Num(_o_Object Delete record action)}:="Object Delete record action"
+<>VCF_ObjectActions_at{Num(_o_Object Next page action)}:="Object Next page action"
+<>VCF_ObjectActions_at{Num(_o_Object Previous page action)}:="Object Previous page action"
+<>VCF_ObjectActions_at{Num(_o_Object First page action)}:="Object First page action"
+<>VCF_ObjectActions_at{Num(_o_Object Last page action)}:="Object Last page action"
+<>VCF_ObjectActions_at{Num(_o_Object Edit subrecord action)}:="Object Edit subrecord action"
+<>VCF_ObjectActions_at{Num(_o_Object Delete subrecord action)}:="Object Delete subrecord action"
+<>VCF_ObjectActions_at{Num(_o_Object Add subrecord action)}:="Object Add subrecord action"
+<>VCF_ObjectActions_at{Num(_o_Object Goto page action)}:="Object Goto page action"
+<>VCF_ObjectActions_at{Num(_o_Object Automatic splitter action)}:="Object Automatic splitter action"
+<>VCF_ObjectActions_at{Num(_o_Object Undo action)}:="Object Undo action"
+<>VCF_ObjectActions_at{Num(_o_Object Cut action)}:="Object Cut action"
+<>VCF_ObjectActions_at{Num(_o_Object Copy action)}:="Object Copy action"
+<>VCF_ObjectActions_at{Num(_o_Object Paste action)}:="Object Paste action"
+<>VCF_ObjectActions_at{Num(_o_Object Clear action)}:="Object Clear action"
+<>VCF_ObjectActions_at{Num(_o_Object Select all action)}:="Object Select all action"
+<>VCF_ObjectActions_at{Num(_o_Object Show Clipboard action)}:="Object Show Clipboard action"
+<>VCF_ObjectActions_at{Num(_o_Object Test Application action)}:="Object Test Application action"
+<>VCF_ObjectActions_at{Num(_o_Object Quit action)}:="Object Quit action"
+<>VCF_ObjectActions_at{Num(_o_Object Redo action)}:="Object Redo action"
+<>VCF_ObjectActions_at{Num(_o_Object Database Settings action)}:="Object Database Settings action"
+<>VCF_ObjectActions_at{Num(_o_Object Return to Design mode action)}:="Object Return to Design mode action"
+<>VCF_ObjectActions_at{Num(_o_Object MSC action)}:="Object MSC action"
+<>VCF_ObjectActions_at{Num(_o_Object Open back URL action)}:="Object Open back URL action"
+<>VCF_ObjectActions_at{Num(_o_Object Open next URL action)}:="Object Open next URL action"
+<>VCF_ObjectActions_at{Num(_o_Object Refresh current URL action)}:="Object Refresh current URL action"
+<>VCF_ObjectActions_at{Num(_o_Object Stop loading URL action)}:="Object Stop loading URL action"
+
+
+ARRAY TEXT(<>VCF_ObjectTypes_at;40)
+
+<>VCF_ObjectTypes_at{Object type static text}:="Object type static text"
+<>VCF_ObjectTypes_at{Object type static picture}:="Object type static picture"
+<>VCF_ObjectTypes_at{Object type text input}:="Object type text input"
+<>VCF_ObjectTypes_at{Object type picture input}:="Object type picture input"
+<>VCF_ObjectTypes_at{Object type radio button field}:="Object type radio button field"
+<>VCF_ObjectTypes_at{Object type hierarchical list}:="Object type hierarchical list"
+<>VCF_ObjectTypes_at{Object type listbox}:="Object type listbox"
+<>VCF_ObjectTypes_at{Object type listbox header}:="Object type listbox header"
+<>VCF_ObjectTypes_at{Object type listbox column}:="Object type listbox column"
+<>VCF_ObjectTypes_at{Object type listbox footer}:="Object type listbox footer"
+<>VCF_ObjectTypes_at{Object type combobox}:="Object type combobox"
+<>VCF_ObjectTypes_at{Object type popup dropdown list}:="Object type popup dropdown list"
+<>VCF_ObjectTypes_at{Object type hierarchical popup menu}:="Object type hierarchical popup menu"
+<>VCF_ObjectTypes_at{Object type picture popup menu}:="Object type picture popup menu"
+<>VCF_ObjectTypes_at{Object type push button}:="Object type push button"
+<>VCF_ObjectTypes_at{Object type 3D button}:="Object type 3D button"
+<>VCF_ObjectTypes_at{Object type highlight button}:="Object type highlight button"
+<>VCF_ObjectTypes_at{Object type invisible button}:="Object type invisible button"
+<>VCF_ObjectTypes_at{Object type picture button}:="Object type picture button"
+<>VCF_ObjectTypes_at{Object type button grid}:="Object type button grid"
+<>VCF_ObjectTypes_at{Object type group}:="Object type group"
+<>VCF_ObjectTypes_at{Object type radio button}:="Object type radio button"
+<>VCF_ObjectTypes_at{Object type 3D radio button}:="Object type 3D radio button"
+<>VCF_ObjectTypes_at{Object type picture radio button}:="Object type picture radio button"
+<>VCF_ObjectTypes_at{Object type checkbox}:="Object type checkbox"
+<>VCF_ObjectTypes_at{Object type 3D checkbox}:="Object type 3D checkbox"
+<>VCF_ObjectTypes_at{Object type progress indicator}:="Object type progress indicator"
+<>VCF_ObjectTypes_at{Object type dial}:="Object type dial"
+<>VCF_ObjectTypes_at{Object type ruler}:="Object type ruler"
+<>VCF_ObjectTypes_at{Object type groupbox}:="Object type groupbox"
+<>VCF_ObjectTypes_at{Object type rectangle}:="Object type rectangle"
+<>VCF_ObjectTypes_at{Object type line}:="Object type line"
+<>VCF_ObjectTypes_at{Object type rounded rectangle}:="Object type rounded rectangle"
+<>VCF_ObjectTypes_at{Object type oval}:="Object type oval"
+<>VCF_ObjectTypes_at{Object type matrix}:="Object type matrix"
+<>VCF_ObjectTypes_at{Object type splitter}:="Object type splitter"
+<>VCF_ObjectTypes_at{Object type tab control}:="Object type tab control"
+<>VCF_ObjectTypes_at{Object type plugin area}:="Object type plugin area"
+<>VCF_ObjectTypes_at{Object type subform}:="Object type subform"
+<>VCF_ObjectTypes_at{Object type web area}:="Object type web area"
+<>VCF_ObjectTypes_at{Object type unknown}:="Object type unknown"
+
+
+ARRAY TEXT(<>VCF_VariableTypes_at;35)
+
+<>VCF_VariableTypes_at{Is alpha field}:="Is Alpha Field"
+<>VCF_VariableTypes_at{Is real}:="Is Real"
+<>VCF_VariableTypes_at{Is text}:="Is Text"
+<>VCF_VariableTypes_at{Is picture}:="Is Picture"
+<>VCF_VariableTypes_at{Is date}:="Is Date"
+<>VCF_VariableTypes_at{Is undefined}:="Is Undefined"
+<>VCF_VariableTypes_at{Is boolean}:="Is Boolean"
+<>VCF_VariableTypes_at{Is subtable}:="Is Subtable"
+<>VCF_VariableTypes_at{Is integer}:="Is Integer"
+<>VCF_VariableTypes_at{Is longint}:="Is LongInt"
+<>VCF_VariableTypes_at{Is time}:="Is Time"
+<>VCF_VariableTypes_at{Array 2D}:="Array 2D"
+<>VCF_VariableTypes_at{Real array}:="Real array"
+<>VCF_VariableTypes_at{Integer array}:="Integer array"
+<>VCF_VariableTypes_at{LongInt array}:="LongInt array"
+<>VCF_VariableTypes_at{Date array}:="Date array"
+<>VCF_VariableTypes_at{Text array}:="Text array"
+<>VCF_VariableTypes_at{Picture array}:="Picture array"
+<>VCF_VariableTypes_at{Pointer array}:="Pointer array"
+<>VCF_VariableTypes_at{String array}:="String array"
+<>VCF_VariableTypes_at{Boolean array}:="Boolean array"
+<>VCF_VariableTypes_at{Is pointer}:="Is Pointer"
+<>VCF_VariableTypes_at{Is string var}:="Is String Var"
+<>VCF_VariableTypes_at{Is integer 64 bits}:="Is Integer 64 bits"
+<>VCF_VariableTypes_at{Is BLOB}:="Is BLOB"
+<>VCF_VariableTypes_at{Is float}:="Is Float"
+
+
+ARRAY TEXT(<>VCF_SubformPrintFrame_at;2)
+
+<>VCF_SubformPrintFrame_at{Print Frame fixed with truncation}:="Print Frame fixed with truncation"
+<>VCF_SubformPrintFrame_at{Print Frame fixed with multiple records}:="Print Frame fixed with multiple records"
+
+
+ARRAY TEXT(<>VCF_HorizontalSizing_at;2)
+
+<>VCF_HorizontalSizing_at{Resize horizontal none}:="Resize horizontal none"
+<>VCF_HorizontalSizing_at{Resize horizontal grow}:="Resize horizontal grow"
+<>VCF_HorizontalSizing_at{Resize horizontal move}:="Resize horizontal move"
+
+
+ARRAY TEXT(<>VCF_VerticalSizing_at;2)
+
+<>VCF_VerticalSizing_at{Resize vertical none}:="Resize vertical none"
+<>VCF_VerticalSizing_at{Resize vertical grow}:="Resize vertical grow"
+<>VCF_VerticalSizing_at{Resize vertical move}:="Resize vertical move"
+
+
+ARRAY TEXT(<>VCF_RGBColors_at;16)
+
+<>VCF_RGBColors_at{Abs(Background color)}:="Background color"
+<>VCF_RGBColors_at{Abs(Dark shadow color)}:="Dark shadow color"
+<>VCF_RGBColors_at{Abs(Disable highlight item color)}:="Disable highlight item color"
+<>VCF_RGBColors_at{Abs(Foreground color)}:="Foreground color"
+<>VCF_RGBColors_at{Abs(Highlight menu background color)}:="Highlight menu background color"
+<>VCF_RGBColors_at{Abs(Highlight menu text color)}:="Highlight menu text color"
+<>VCF_RGBColors_at{Abs(Highlight text background color)}:="Highlight text background color"
+<>VCF_RGBColors_at{Abs(Highlight text color)}:="Highlight text color"
+<>VCF_RGBColors_at{Abs(Light shadow color)}:="Light shadow color"
+<>VCF_RGBColors_at{Abs(Background color none)}:="Background color none"
+
+
+ARRAY TEXT(<>VCF_VerticalAlign_at;4)
+
+<>VCF_VerticalAlign_at{Align default}:="Align default"
+<>VCF_VerticalAlign_at{Align top}:="Align top"
+<>VCF_VerticalAlign_at{Align center}:="Align center"
+<>VCF_VerticalAlign_at{Align bottom}:="Align bottom"

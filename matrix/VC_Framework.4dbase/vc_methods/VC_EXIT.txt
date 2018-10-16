@@ -1,0 +1,35 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"executedOnServer":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 08/01/14, 15:52:10
+  // ----------------------------------------------------
+  // Description:
+  //   VC_Framework exit code.
+  //
+  //   Stop background processes gracefully.
+  //
+  //   Background: If the database does not have an On
+  //   Exit (or On Server Shutdown) method there is no way
+  //   for me to tell when the database quits, and thus
+  //   have VC_Framework exit gracefully.
+  //
+  //   I finally gave in and created an exit method. The
+  //   user could call this method from their On Exit if
+  //   they want explicit control. The thing is, if they
+  //   create an On Exit method, the code will probably
+  //   kill itself regardless because it works ok in a
+  //   database that has On Exit.
+  //
+  //   There's also the On Host Database Event method, new
+  //   in v14. They can enable support for that instead.
+  //
+  //   Basically those that have no On Exit database
+  //   method at all are screwed; they must rely on 4D to
+  //   kill the VC_Framework processes.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN(<>VC_Enabled_f)
+
+If (<>VC_Enabled_f)
+	VC_EXPORT_Stop 
+	VC_DELETE_Stop 
+End if 

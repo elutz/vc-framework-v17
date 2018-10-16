@@ -1,0 +1,27 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"executedOnServer":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): jfletcher
+  // Date and time: 04/06/12, 14:59:45
+  // ----------------------------------------------------
+  // Description:
+  //   Clear previous error state, allowing the process
+  //   to continue it's job.
+  //
+  //   Called by Macro (so test to see if <>VC_Enabled_f is true)
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($error_l)
+
+C_BOOLEAN(<>VC_Enabled_f)
+
+UTIL_ERR_Startup 
+
+If (<>VC_Enabled_f)
+	<>VC_ERROR_F:=False
+Else 
+	$error_l:=<>ERR_VC_NotEnabled_l
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+End if 

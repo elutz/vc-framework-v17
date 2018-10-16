@@ -1,0 +1,24 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/22/14, 17:22:49
+  // ----------------------------------------------------
+  // Description:
+  //   Returns the file name from a given file path
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$filePath_t)
+
+C_TEXT($0)
+
+C_LONGINT($pos_l)
+
+$filePath_t:=$1
+
+$pos_l:=Position(Folder separator;$filePath_t)
+
+While ($pos_l#0)
+	$filePath_t:=Substring($filePath_t;$pos_l+1)
+	$pos_l:=Position(Folder separator;$filePath_t)
+End while 
+
+$0:=$filePath_t

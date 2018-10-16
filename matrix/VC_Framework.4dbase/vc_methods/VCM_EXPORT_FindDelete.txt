@@ -1,0 +1,134 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Method Export","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 10/11/12, 16:50:52
+  // ----------------------------------------------------
+  // Description:
+  //   Search for methods that have been deleted.
+  //
+  //   Note: this method searches every method in the
+  //   database, every time. In large databases the
+  //   liklehood of a progress bar appearing is quite
+  //   high. I don't want a progress bar to open every
+  //   time the code is checked. So I removed the
+  //   progress module from this method (and also
+  //   optimized it to be faster).
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+C_LONGINT(VCM_METHOD_MGPduration_l;VCM_METHOD_MGPcount_l)
+
+C_LONGINT($numMethodsInTable_l;$currentMethod_l;$zeroStamp_l;$pos_l)
+C_LONGINT($begin_l;$end_l)
+C_TEXT($currentMethodPath_t;$newAction_t;$stateFilter_t)
+C_BOOLEAN($methodExists_f)
+
+ARRAY TEXT($methodsInDatabase_at;0)
+ARRAY TEXT($methodsInTable_at;0)
+
+
+  // ====================================================================
+  // Get all methods in the asset table.
+
+  // METHOD GET PATHS requires a variable. Though I want to just
+  // get all methods I still need a variable, can't just pass 0.
+$zeroStamp_l:=0
+$error_l:=VC_EXT_Open 
+If ($error_l=0)
+	
+	  // Get all active records.
+	  // I.e. ignore previously deleted methods.
+	$stateFilter_t:=<>VC_STATE_Active_t
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		SELECT path
+		FROM VC_Assets
+		WHERE state = :$stateFilter_t
+		AND type = :[<>VC_TYPE_Method_t]
+		INTO :$methodsInTable_at;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+
+  // ====================================================================
+  // Get all methods in the database.
+If ($error_l=0)
+	  // I will compare every method in the database to the records in the component table.
+	UTIL_ERR_HandlerInstall ("VC_ERR_HandleMGP")
+	$begin_l:=Milliseconds
+	METHOD GET PATHS(Path all objects;$methodsInDatabase_at;$zeroStamp_l;*)
+	$end_l:=Milliseconds
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+  // Design mode hangs when calling MGP. In a large database this can be noticable.
+  // I measure the time it takes and warn the user if it's too slow.
+If ($error_l=0)
+	VCM_METHOD_MGPduration_l:=$end_l-$begin_l
+	VCM_METHOD_MGPcount_l:=VCM_METHOD_MGPcount_l+1
+End if 
+
+
+  // ====================================================================
+  // Compare methods in database to forms in the asset table.
+If ($error_l=0)
+	
+	$numMethodsInTable_l:=Size of array($methodsInTable_at)
+	
+	If ($numMethodsInTable_l>0)
+		
+		$currentMethod_l:=1
+		
+		  // Loop over each method to check...
+		While (($currentMethod_l<=$numMethodsInTable_l) & ($error_l=0))
+			
+			$currentMethodPath_t:=$methodsInTable_at{$currentMethod_l}
+			
+			  // ====================================================================
+			  // See if the method still exists in the database.
+			
+			  // NOTE: I created UTIL_MethodExists to do this, but
+			  // this loop is already slow. Removing the subroutine
+			  // call sped it up a lot.
+			$pos_l:=Find in array($methodsInDatabase_at;$currentMethodPath_t)
+			If ($pos_l>0)
+				$methodExists_f:=True
+			Else 
+				$methodExists_f:=False
+			End if 
+			  // ====================================================================
+			
+			If (Not($methodExists_f))
+				  // The method no longer exists in the database, mark it for delete.
+				$newAction_t:=<>VC_ACTION_Delete_t
+				UTIL_ERR_HandlerInstall 
+				Begin SQL
+					UPDATE VC_Assets
+					SET action = :$newAction_t
+					WHERE path = :$currentMethodPath_t
+					AND type = :[<>VC_TYPE_Method_t];
+				End SQL
+				$error_l:=UTIL_ERR_HandlerRemove 
+			End if 
+			
+			  // Only increment if there was no error (in case I want to refer back to where I failed).
+			If ($error_l=0)
+				$currentMethod_l:=$currentMethod_l+1
+			End if 
+			
+		End while 
+		
+	End if 
+	
+End if 
+
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

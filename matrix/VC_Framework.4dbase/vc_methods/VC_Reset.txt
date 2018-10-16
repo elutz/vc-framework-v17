@@ -1,0 +1,73 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"executedOnServer":true,"folder":"VC_Framework Startup","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/11/12, 17:56:33
+  // ----------------------------------------------------
+  // Description:
+  //   Completely reset asset export, reset stamps to 0.
+  //
+  //   This can force a full asset dump.
+  //
+  //   Note: executes on server.
+  //
+  //   Called by Macro (so test to see if <>VC_Enabled_f is true)
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($error_l)
+
+C_BOOLEAN(<>VC_Enabled_f)
+
+UTIL_ERR_Startup 
+
+If (Not(<>VC_Enabled_f))
+	$error_l:=<>ERR_VC_NotEnabled_l
+End if 
+
+  // Open external database.
+If ($error_l=0)
+	$error_l:=VC_EXT_Open 
+End if 
+
+If ($error_l=0)
+	  // Reset method stamp.
+	$error_l:=VC_EXT_PrefSet (<>VCM_LABEL_Stamp_t;"0")
+End if 
+If ($error_l=0)
+	<>VCM_LastMethodStamp_l:=0
+End if 
+
+  // Reset import stamp.
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VCM_LABEL_StampImport_t;"0")
+End if 
+
+  // Reset form stamp.
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VCF_LABEL_Stamp_t;"0")
+End if 
+If ($error_l=0)
+	<>VCF_LastFormStamp_l:=0
+End if 
+
+
+  // Clear all log data.
+If ($error_l=0)
+	$error_l:=VC_LOG_Clear 
+End if 
+
+
+  // Clear all asset data.
+If ($error_l=0)
+	$error_l:=VC_EXPORT_Clear 
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+  // Since this can be called by a marco you have to handle the error here.
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+End if 

@@ -1,0 +1,23 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 01/14/14, 11:28:23
+  // ----------------------------------------------------
+  // Description:
+  //   Set a flag to ignore the delete performance test
+  //   (VC_DELETE_PerfTest)
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($1;$deleteIgnore_f)
+
+C_LONGINT($error_l)
+
+$deleteIgnore_f:=$1
+
+$error_l:=VC_EXT_PrefSet (<>VC_LABEL_DeleteIgnoreSlow_t;String($deleteIgnore_f))
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+Else 
+	  // Make sure to update IP var.
+	<>VCM_DeleteIgnore_f:=$deleteIgnore_f
+End if 

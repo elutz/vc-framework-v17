@@ -1,0 +1,87 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Method Export","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): jfletcher
+  // Date and time: 04/19/12, 16:51:31
+  // ----------------------------------------------------
+  // Description:
+  //   Wrapper method, loop over all provided method paths
+  //   and validate. Log any errors.
+  // --[HEADEREND]---------------------------------------
+C_POINTER($1;$pathsToValidate_p_at)
+
+C_LONGINT($0;$error_l)
+
+C_LONGINT($numPaths_l;$currentPath_l;$progID_l;$progThreshold_l)
+C_REAL($progress_r)
+C_TEXT($currentMethodPath_t;$progTitle_t)
+C_BOOLEAN($badPathsFound_f)
+C_OBJECT($error_o;$methodMetaData_o)
+
+$pathsToValidate_p_at:=$1
+
+$badPathsFound_f:=False
+
+$numPaths_l:=Size of array($pathsToValidate_p_at->)
+  // Array is traveresed in reverse because I may be deleting elements.
+$currentPath_l:=$numPaths_l
+
+$error_l:=VC_EXT_Open 
+
+If ($error_l=0)
+	
+	If (VC_ProgInstalled_f & (<>VC_Quit_f=False))
+		$progThreshold_l:=1000
+		$progTitle_t:=<>VC_ComponentName_t+" Validating Method Paths"
+		$progID_l:=PROG_Create ($progTitle_t;$numPaths_l;$progThreshold_l)
+	End if 
+	
+	  // Loop over each method to validate the paths...
+	While (($currentPath_l>=1) & (($error_l=0) | ($error_l=<>WARN_ASSET_BadName_L)))
+		
+		$currentMethodPath_t:=$pathsToValidate_p_at->{$currentPath_l}
+		
+		If (VC_ProgInstalled_f & (<>VC_Quit_f=False))
+			$progress_r:=($numPaths_l-$currentPath_l)/$numPaths_l
+			PROG_Update ($progID_l;$progress_r;($numPaths_l-$currentPath_l)+1;$numPaths_l;$currentMethodPath_t)
+		End if 
+		
+		  // Validate the path.
+		If (($error_l=0) | ($error_l=<>WARN_ASSET_BadName_L))
+			$error_o:=VCM_PATH_Validate ($currentMethodPath_t)
+			$error_l:=OB Get($error_o;<>VCM_KEY_ErrorCode_t)
+		End if 
+		
+		  // Method name/path invalid, remove it from the array.
+		If ($error_l=<>WARN_ASSET_BadName_L)
+			$badPathsFound_f:=True  // This is a flag to let the calling method know if there were any bad paths.
+			
+			  // Remove the bad path from the array.
+			DELETE FROM ARRAY($pathsToValidate_p_at->;$currentPath_l)
+			
+			  // Get the method metadata and log the error.
+			$methodMetaData_o:=OB Get($error_o;<>VCM_KEY_methodMetaData_t)
+			$error_l:=VC_LOG_InsertItem ($currentMethodPath_t;<>VC_TYPE_Method_t;$methodMetaData_o)
+		End if 
+		
+		  // Only decrement if there was no error (in case I want to refer back to where I failed).
+		If (($error_l=0) | ($error_l=<>WARN_ASSET_BadName_L))
+			$currentPath_l:=$currentPath_l-1
+		End if 
+		
+	End while 
+	
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($badPathsFound_f)
+	$error_l:=<>WARN_ASSET_BadPathsFound_l
+End if 
+
+  // <>WARN_ASSET_BadPathsFound_l does not stop the component.
+If (($error_l#0) & ($error_l#<>WARN_ASSET_BadPathsFound_l))
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

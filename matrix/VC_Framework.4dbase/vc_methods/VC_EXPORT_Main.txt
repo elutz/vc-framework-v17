@@ -1,0 +1,55 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/15/14, 16:29:49
+  // ----------------------------------------------------
+  // Description:
+  //   Wrapper method for VC_EXPORT_Process tasks.
+  //
+  //   This is so changes can be made without restarting
+  //   the process.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+C_BOOLEAN($warnNeeded_f)
+
+  // Methods.
+If (<>VC_ExportMethods_f)
+	$error_l:=VCM_EXPORT_FindChanges 
+End if 
+
+
+  // Forms.
+If ($error_l=0)
+	If (<>VC_ExportForms_f)
+		$error_l:=VCF_EXPORT_FindChanges 
+	End if 
+End if 
+
+
+  // Are there any new assets to warn the user about?
+If ($error_l=0)
+	$error_l:=VC_LOG_WarnNeeded (->$warnNeeded_f)
+End if 
+  // Warn the user.
+If ($error_l=0)
+	If ($warnNeeded_f)
+		VC_LOG_Start 
+	End if 
+End if 
+
+
+  // Save the changes to disk.
+If ($error_l=0)
+	$error_l:=VC_EXPORT_ExportChanges 
+End if 
+
+If (VC_ProgInstalled_f)
+	PROG_CloseAll 
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

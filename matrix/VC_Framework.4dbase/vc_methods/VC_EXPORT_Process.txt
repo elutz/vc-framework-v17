@@ -1,0 +1,79 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Monitor","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): jfletcher
+  // Date and time: 04/05/12, 15:32:06
+  // ----------------------------------------------------
+  // Description:
+  //   Stored procedure that monitors changes and
+  //   kicks off a save accordingly.
+  //
+  //   See VC_DELETE_@ for deleted and renamed methods.
+  //
+  //   This process is launched via macro events, no
+  //   setup code is required in the Host.
+  //
+  //   Note: This process does all error handling (errors
+  //   bubble up from the rest of the code).
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN(VC_ProgInstalled_f)
+
+C_LONGINT($error_l)
+C_BOOLEAN($showError_f)
+
+  // Set up error handling module.
+UTIL_ERR_Startup 
+
+  // Set up progress bar component.
+VC_ProgInstalled_f:=UTIL_ProgStartup 
+
+  // Used for DELAY PROCESS
+<>VC_ExportProcDelay_l:=VC_CONFIG_ExportProcDelayGet 
+
+  // Check to see which modules are enabled.
+<>VC_ExportForms_f:=VC_CONFIG_ExportFormsGet 
+<>VC_ExportMethods_f:=VC_CONFIG_ExportMethodsGet 
+
+  // Error messages are only displayed the first time; the
+  // process will keep running even if there's an error in
+  // case the user fixes it.
+$showError_f:=True
+
+  // Initialize export modules.
+If ($error_l=0)
+	$error_l:=VCF_EXPORT_Init 
+End if 
+
+If ($error_l=0)
+	$error_l:=VCM_EXPORT_Init 
+End if 
+
+
+If ($error_l=0)
+	Repeat 
+		
+		  // ===================================================================================
+		  // Perform tasks if there is no error.
+		If (<>VC_ERROR_F=False)
+			
+			  // Reset flag to show errors in case it was off.
+			$showError_f:=True
+			
+			  // DON'T ADD METHOD CALLS HERE!
+			  // Add them to "Main", this way changes can be made without restarting the process.
+			$error_l:=VC_EXPORT_Main 
+			
+		End if 
+		
+		
+		  // ===================================================================================
+		  // Perform process maintenance
+		
+		VC_GEN_ProcessMaintenance ($error_l;->$showError_f;-><>VC_StopExport_f;<>VC_ExportProcDelay_l)
+		
+	Until (<>VC_StopExport_f | <>VC_Quit_f)
+	
+Else 
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+End if 
+
+<>VC_ExportProcDone_f:=True

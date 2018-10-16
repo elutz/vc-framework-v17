@@ -1,0 +1,31 @@
+﻿  //%attributes = {"invisible":true,"folder":"Generic Methods","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/20/12, 17:00:48
+  // ----------------------------------------------------
+  // Description:
+  //   Check to see if the method passed in still exists
+  //   in the database.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$methodPath_t)
+
+C_BOOLEAN($0;$methodExists_f)
+
+C_TEXT($dontCare_t)
+C_LONGINT($error_l)
+
+$methodPath_t:=$1
+
+  // This will return an error if the method no longer
+  // exists, but I can inore that.
+UTIL_ERR_HandlerInstall 
+METHOD GET CODE($methodPath_t;$dontCare_t;*)
+$error_l:=UTIL_ERR_HandlerRemove 
+
+If ($error_l=0)
+	$methodExists_f:=True
+Else 
+	$methodExists_f:=False
+End if 
+
+$0:=$methodExists_f

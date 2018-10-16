@@ -1,0 +1,93 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Log","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/20/12, 13:35:53
+  // ----------------------------------------------------
+  // Description:
+  //   Remove any paths from the log table that no longer
+  //   exist in the database. This means the user fixed
+  //   the problem because in order to fix the probelm
+  //   the path had to be changed.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+C_TEXT($assetPath_t;$assetType_t)
+C_LONGINT($i;$limit_l)
+C_BOOLEAN($assetExists_f)
+
+ARRAY TEXT($assetPaths_at;0)
+ARRAY TEXT($assetTypes_at;0)
+
+  // Open external database.
+$error_l:=VC_EXT_Open 
+
+If ($error_l=0)
+	  // Get all method paths.
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		SELECT path, type
+		FROM VC_PathErrorLog
+		INTO :$assetPaths_at, :$assetTypes_at;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+  // Check to see if each path still exists in the database.
+If ($error_l=0)
+	$limit_l:=Size of array($assetPaths_at)
+	$i:=1
+	
+	If ($limit_l>0)
+		
+		While (($i<=$limit_l) & ($error_l=0))
+			$assetPath_t:=$assetPaths_at{$i}
+			$assetType_t:=$assetTypes_at{$i}
+			
+			
+			Case of 
+				: ($assetType_t=<>VC_TYPE_Method_t)
+					$assetExists_f:=VCM_UTIL_MethodExists ($assetPath_t)
+					
+				: ($assetType_t=<>VC_TYPE_Form_t)
+					  // Because this has to search every form in the database,
+					  // the first time this is called, use live data;
+					  // after that used cached results.
+					  // There's some risk of missing a new form by doing
+					  // this but it would be caught the next time around
+					  // anyway (and the only way to get a new form with an
+					  // invalid name is drag and drop from another DB).
+					  // Note: I do not currently have any evidence that
+					  // the code to retreive form names is slow.
+					If ($i=1)
+						$assetExists_f:=VCF_UTIL_FormExists ($assetPath_t)
+					Else 
+						$assetExists_f:=VCF_UTIL_FormExists ($assetPath_t;True)
+					End if 
+					
+			End case 
+			
+			
+			  // If the path no longer exists in the database, delete it from the log table.
+			If ($assetExists_f=False)
+				$error_l:=VC_LOG_DeleteItem ($assetPath_t)
+			End if 
+			
+			
+			If ($error_l=0)
+				$i:=$i+1
+			End if 
+			
+		End while 
+		
+	End if 
+End if 
+
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

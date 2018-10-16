@@ -1,0 +1,13 @@
+﻿  //%attributes = {"lang":"en"} comment added and reserved by 4D.
+C_LONGINT($1;$hostDatabaseEvent_l)
+
+$hostDatabaseEvent_l:=$1
+
+Case of 
+	: ($hostDatabaseEvent_l=On after host database startup)
+		  // this code will be executed after "on startup" of host database
+		VC_STARTUP 
+	: ($hostDatabaseEvent_l=On after host database exit)
+		  // this code will be executed after "on exit" of host database
+		VC_EXIT 
+End case 

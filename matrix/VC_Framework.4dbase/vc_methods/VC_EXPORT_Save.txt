@@ -1,0 +1,57 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/30/14, 16:37:58
+  // ----------------------------------------------------
+  // Description:
+  //   Save asset to disk.
+  //
+  //   Aside from saving the file the main thing this
+  //   method does is make sure all line endings are LF.
+  // ----------------------------------------------------
+  // Changes:
+  //   29May2017 LE - Using TEXT TO DOCUMENT (ensures encoding in UTF-8 with BOM, 
+  //   useful for re-importung and handling with ext. tools)
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$filePath_t)
+C_TEXT($2;$fileContent_t)
+
+C_LONGINT($0;$error_l)
+
+C_BLOB($fileContent_b)
+
+$filePath_t:=$1
+
+$fileContent_t:=$2
+
+  // Create any subfolders for this path, if necessary.
+  // With the new behavior of CREATE FOLDER, you can call this even if all the
+  // folders already exist.
+UTIL_ERR_HandlerInstall 
+CREATE FOLDER($filePath_t;*)  // Pass the * to indicate subfolders should be created.
+$error_l:=UTIL_ERR_HandlerRemove 
+
+
+  // == Save the asset to disk ===================================================
+
+  // == Fix line endings
+  // METHOD GET CODE returns CR for line endings.  This is really uncommon
+  // at the file level.  In point of fact git doesn't support bare CR at
+  // all.  We could be platform specific, and do CRLF for Windows and LF
+  // for Mac but this is messy.  Decided to just standardize on LF.
+  // == Convert the content 
+  // Assets will be saved as UTF-8 so I need to convert
+  // the 4D Text (UTF-16) to UTF-8...
+If ($error_l=0)
+	UTIL_ERR_HandlerInstall 
+	  // Encoding writes UTF-8 with BOM
+	TEXT TO DOCUMENT($filePath_t;$fileContent_t;"UTF-8";Document with LF)
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

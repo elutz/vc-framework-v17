@@ -1,0 +1,62 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/18/14, 14:39:12
+  // ----------------------------------------------------
+  // Description:
+  //   Check to see if the indicated form still exists
+  //   in the database.
+  //
+  //   Note: can be optimized for performance, if you
+  //   pass true it will use cached/saved values instead
+  //   of getting fresh ones every time.  Do this
+  //   for tight loops but, otherwise, you should
+  //   probably always get the latest list. 
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$formPath_t)
+C_BOOLEAN($2;$useCache_f)
+
+C_BOOLEAN($0;$formExists_f)
+
+C_TEXT($formName_t)
+C_LONGINT($zeroStamp_l;$error_l;$pos_l;$tableNum_l;$numForms_l)
+
+ARRAY TEXT(cachedFormNames_at;0)
+ARRAY LONGINT(cachedTableNums_al;0)
+
+$formPath_t:=$1
+
+If (Count parameters>1)
+	$useCache_f:=$2
+Else 
+	$useCache_f:=False
+End if 
+
+  // If the user doesn't want to use cached values, get the latest items.
+If ($useCache_f=False)
+	$zeroStamp_l:=0
+	$error_l:=VCF_EXPORT_FormGet (->$zeroStamp_l;->cachedFormNames_at;->cachedTableNums_al)
+End if 
+
+
+If ($error_l=0)
+	
+	  // Get the form name and table number.
+	VC_UTIL_FormResolvePath ($formPath_t;->$formName_t;->$tableNum_l)
+	
+	  // Search through existing forms to see if it still exists.
+	  // Note: form names need not be unique so there may be more than one.
+	$numForms_l:=Size of array(cachedFormNames_at)
+	Repeat 
+		$pos_l:=Find in array(cachedFormNames_at;$formName_t;$pos_l+1)
+		If ($pos_l>0)
+			  // Once a matching form is found, make sure it's the matching table as well.
+			If ($tableNum_l=cachedTableNums_al{$pos_l})
+				$formExists_f:=True
+			End if 
+		End if 
+	Until ($formExists_f | ($pos_l=-1))
+	
+End if 
+
+$0:=$formExists_f

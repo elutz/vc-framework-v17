@@ -1,0 +1,233 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"executedOnServer":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Lutz Epperlein
+  // Date and time: 24.05.2013, 17:56:33
+  // ----------------------------------------------------
+  // Description:
+  //   Import outside created or changed methods 
+  //   existing on file system.
+  //
+  //   Note: executes on server.
+  //
+  //   Called by Macro.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($error_l)
+C_TEXT($message)
+
+C_BOOLEAN(<>VC_Enabled_f)
+
+UTIL_ERR_Startup 
+
+
+
+If (<>VC_Enabled_f)
+	
+	C_LONGINT($progID_l;$progThreshold_l)
+	$progThreshold_l:=1000
+	$progID_l:=PROG_Create ("Import";4;$progThreshold_l)
+	
+	
+	PROG_Update ($progID_l;0)
+	  // Listing the content of the filesystem dir recursively
+	  // accessing the timestamp of the files
+	C_TEXT($sourcepath)
+	$sourcepath:=Convert path POSIX to system(<>VCM_ROOT_POSIX_T+"/")
+	ARRAY TEXT($doclist;0)
+	DOCUMENT LIST($sourcepath;$doclist;Recursive parsing+Absolute path+Ignore invisible)
+	
+	PROG_Update ($progID_l;1/4)
+	
+	  // two approaches of detecting which methods have to be imported
+	  // 1. all methods with a newer or same timestamp of the last edit in the database
+	  // 2. all methods after the the last import
+	
+	  // if is the timestamp of the last import = 0, use method 1. i.e. the timestamp of the last change
+	  // in all other cases use the the timestamp of the last import
+	
+	  // get the last import timestamp
+	C_TEXT($lastImportISODate)  // the last import time stamp as an ISO8601 formatted text
+	VC_EXT_PrefGet (<>VCM_LABEL_StampImport_t;->$lastImportISODate)
+	If ($lastImportISODate#"0")
+		
+		C_LONGINT($T)  // position of "T" in ISO date
+		$T:=Position("T";$lastImportISODate)
+		$lastChangedAt:=Time(Substring($lastImportISODate;$T+1))
+		$lastChangedOn:=Date($lastImportISODate)
+		$recentfile:="the last import"  // 
+		
+	Else 
+		
+		  // Get the next to last method stamp.
+		C_LONGINT($currentMethodStamp_l;$lastMethodStamp_l)
+		$lastMethodStamp_l:=<>VCM_LastMethodStamp_l
+		
+		  // Since the timespamp got from METHOD GET CODE is rather a counter of changes we have to 
+		  // detect the real date and time.
+		ARRAY TEXT($methodslastChanged_at;0)
+		
+		Repeat 
+			$currentMethodStamp_l:=$lastMethodStamp_l
+			METHOD GET PATHS(Path all objects;$methodslastChanged_at;$currentMethodStamp_l;*)
+			$lastMethodStamp_l:=$lastMethodStamp_l-1
+		Until (Size of array($methodslastChanged_at)>0)
+		
+		PROG_Update ($progID_l;2/4)
+		
+		  // find the most recent file 
+		C_BOOLEAN($locked;$hidden)
+		C_DATE($createdOn;$changedOn;$lastChangedOn)
+		C_TIME($createdAt;$changedAt;$lastChangedAt)
+		C_TEXT($recentfile)
+		$recentfile:=Convert path POSIX to system($sourcepath+$methodslastChanged_at{1}+".txt")
+		  // and the get date and time of the last change
+		GET DOCUMENT PROPERTIES($recentfile;$locked;$hidden;$createdOn;$createdAt;$lastChangedOn;$lastChangedAt)
+		
+	End if 
+	
+	C_LONGINT($index)
+	For ($index;Size of array($doclist);1;-1)
+		
+		GET DOCUMENT PROPERTIES($doclist{$index};$locked;$hidden;$createdOn;$createdAt;$changedOn;$changedAt)
+		
+		If (($doclist{$index}#"@.txt") | (Match regex(".*/\\..*";Convert path system to POSIX($doclist{$index}))))  // platform agnostic
+			  // process .txt files only and don't process hidden files with . (like .hg/last-message.txt)
+			DELETE FROM ARRAY($doclist;$index)
+			
+		Else 
+			  // all files with newer timestamps then our last method time stamp
+			  // will be imported
+			  // remove older entries
+			If ($changedOn<$lastChangedOn)
+				DELETE FROM ARRAY($doclist;$index)
+				
+			Else 
+				
+				If ($lastImportISODate#"0")
+					  // the normal case, don't include the last import itself
+					  // only newer edits
+					If (($changedOn=$lastChangedOn) & ($changedAt<=$lastChangedAt))
+						DELETE FROM ARRAY($doclist;$index)
+						
+					End if 
+					
+				Else 
+					  // in the case of using the timestamp of the last edits of the 
+					  // we have to include the last edits too
+					  // to not lose some changes
+					If (($changedOn=$lastChangedOn) & ($changedAt<$lastChangedAt))
+						DELETE FROM ARRAY($doclist;$index)
+						
+					End if 
+					
+				End if 
+				
+			End if 
+		End if 
+		
+	End for 
+	
+	  // ====== presenting alert ======
+	  // TODO improve UI
+	C_TEXT($listOfMethods)
+	C_LONGINT($methos_index)
+	$listOfMethods:=""
+	For ($methos_index;1;Size of array($doclist))
+		GET DOCUMENT PROPERTIES($doclist{$methos_index};$locked;$hidden;$createdOn;$createdAt;$changedOn;$changedAt)
+		$listOfMethods:=$listOfMethods+\
+			Replace string(Convert path system to POSIX($doclist{$methos_index});<>VCM_ROOT_POSIX_T+"/";"")+\
+			"\t"+String($changedOn)+" "+String($changedAt)+"\n"
+	End for 
+	
+	ALERT("Import of "+String(Size of array($doclist))+" methods\n"+\
+		"newer as "+$recentfile+" "+String($lastChangedOn)+" "+String($lastChangedAt)+"\n"+\
+		$listOfMethods)
+	
+	PROG_Update ($progID_l;3/4)
+	
+	$error_l:=Choose(Size of array($doclist)>0;0;<>ERR_IMPORT_NothingToImport_l)
+	
+	  // And now import the code
+	C_LONGINT($progIDFiles_l)
+	$progIDFiles_l:=PROG_Create ("Files";Size of array($doclist);$progThreshold_l)
+	
+	For ($index;1;Size of array($doclist))
+		
+		  // Check the size of the method
+		C_LONGINT($docSize)
+		UTIL_ERR_HandlerInstall 
+		$docSize:=Get document size($doclist{$index})
+		$error_l:=UTIL_ERR_HandlerRemove 
+		
+		If ($error_l=0)
+			If ($docSize=0)
+				$error_l:=<>ERR_IMPORT_EmptyMethod_l
+			End if 
+		End if 
+		
+		  // load the code from disk
+		If ($error_l=0)
+			UTIL_ERR_HandlerInstall 
+			C_TEXT($methodBody)
+			$methodBody:=Document to text($doclist{$index};"UTF-8";Document with CR)
+			
+			$error_l:=UTIL_ERR_HandlerRemove 
+		End if 
+		
+		  // Wrong encoding: reading withouterror but the content is empty
+		If ($error_l=0)
+			If (Length($methodBody)=0)
+				$error_l:=<>ERR_IMPORT_WrongEncoding_l
+			End if 
+		End if 
+		
+		PROG_Update ($progIDFiles_l;$index/Size of array($doclist);$index)
+		
+		If ($error_l=0)
+			
+			  // system path to method path
+			C_TEXT($filePathPosix;$DOAPath_t)
+			$filePathPosix:=Convert path system to POSIX($doclist{$index})
+			$DOAPath_t:=Replace string($filePathPosix;<>VCM_ROOT_POSIX_T+"/";"")
+			$DOAPath_t:=Replace string($DOAPath_t;".txt";"")
+			
+			  // load the code
+			UTIL_ERR_HandlerInstall 
+			METHOD SET CODE($DOAPath_t;$methodBody;*)
+			$error_l:=UTIL_ERR_HandlerRemove 
+			
+		End if 
+		
+		  //End if 
+		
+		If ($error_l#0)
+			  // for error reporting
+			$message:=$doclist{$index}
+			$index:=Size of array($doclist)+1  // break of for-loop
+		End if 
+		
+	End for 
+	
+	If ($error_l=0)
+		  // save the timestmap of the last sucessful import
+		VC_EXT_PrefSet (<>VCM_LABEL_StampImport_t;String(Current date;ISO date;Current time))
+	End if 
+	
+	PROG_Update ($progID_l;1)
+	
+Else 
+	  // This should be impossible, because you have to open
+	  // a method in order to run the the macro that calls
+	  // this method...opening a method launches the component.
+	$error_l:=<>ERR_VC_NotEnabled_l
+	  //UTIL_ERR_ErrorMethod_t:=Current method name
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name;"Error while importing: "+$message)
+End if 
+
+PROG_CloseAll 

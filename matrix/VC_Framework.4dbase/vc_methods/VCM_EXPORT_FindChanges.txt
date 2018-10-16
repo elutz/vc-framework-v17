@@ -1,0 +1,95 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): jfletcher
+  // Date and time: 04/05/12, 16:14:59
+  // ----------------------------------------------------
+  // Description:
+  //   Find all method changes, log them for later export.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+C_LONGINT($currentMethodStamp_l)
+C_BOOLEAN($externalDatabaseOpen_f)
+
+ARRAY TEXT($methodsToSave_at;0)
+
+  // Get the last method stamp.
+$currentMethodStamp_l:=<>VCM_LastMethodStamp_l
+
+  // ==============================================================================
+  // Get changed methods since last stamp.
+UTIL_ERR_HandlerInstall ("VC_ERR_HandleMGP")
+METHOD GET PATHS(Path all objects;$methodsToSave_at;$currentMethodStamp_l;*)
+$error_l:=UTIL_ERR_HandlerRemove 
+
+If (($error_l=0) & (Size of array($methodsToSave_at)>0))
+	  // Optimization since the rest of the methods could open and close a lot.
+	$error_l:=VC_EXT_Open 
+	If ($error_l=0)
+		$externalDatabaseOpen_f:=True
+	End if 
+	
+	
+	  // ==============================================================================
+	  // Validate method paths (invalid paths will be removed).
+	If ($error_l=0)
+		$error_l:=VCM_PATH_ValidateAll (->$methodsToSave_at)
+	End if 
+	
+	If ($error_l=<>WARN_ASSET_BadPathsFound_l)
+		  // This error is ignorable. The user will be warned, but
+		  // it shouldn't stop the export.
+		$error_l:=0
+	End if 
+	
+	
+	  // ==============================================================================
+	  // Determine create/update actions.
+	If ($error_l=0)
+		$error_l:=VCM_EXPORT_FindCreateUpdate (->$methodsToSave_at)
+	End if 
+	
+End if 
+
+
+  // ==============================================================================
+  // Determine delete actions.
+
+  // Only run this if something actually changed. This is to minimize
+  // the impact of METHOD GET PATHS, which can freeze design mode.
+  // Note there's a lot of ways the stamp can change (compiling,
+  // switching from User to Design, etc.) so this current test may
+  // still have too high of an impact. The reason I'm checking the
+  // stamp is I verified that the stamp will change when a method is
+  // deleted.
+  // If the performance impact is still to high, here's an alternative test.
+  // If( ($error_l=0)&(Size of array($methodsToSave_at)>0 )
+If (($error_l=0) & (<>VCM_LastMethodStamp_l#$currentMethodStamp_l))
+	If (<>VCM_DeleteOnChange_f)
+		$error_l:=VCM_EXPORT_FindDelete 
+	End if 
+End if 
+
+
+If ($externalDatabaseOpen_f)
+	  // Close external database.
+	$error_l:=VC_EXT_Close ($error_l)
+End if 
+
+
+  // Check to see if the stamp changed and save it if so.
+If ($error_l=0)
+	If (<>VCM_LastMethodStamp_l#$currentMethodStamp_l)
+		$error_l:=VC_EXT_PrefSet (<>VCM_LABEL_Stamp_t;String($currentMethodStamp_l))
+		If ($error_l=0)
+			  // Only update the stamp if the save was successful.
+			<>VCM_LastMethodStamp_l:=$currentMethodStamp_l
+		End if 
+	End if 
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

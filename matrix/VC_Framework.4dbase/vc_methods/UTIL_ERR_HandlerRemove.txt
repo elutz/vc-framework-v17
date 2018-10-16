@@ -1,0 +1,24 @@
+﻿  //%attributes = {"invisible":true,"folder":"Error Handling","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): jfletcher
+  // Date and time: 04/05/12, 16:25:45
+  // ----------------------------------------------------
+  // Description:
+  //   Uninstall current error handler, restore previous
+  //   error handler.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;UTIL_ERR_4DError_l)
+
+  // Note: these proc vars are set in UTIL_ERR_HandlerInstall
+C_TEXT(oldErrorHandler_t;newErrorHandler_t)
+
+C_TEXT($installedErrorHandler_t)
+
+$installedErrorHandler_t:=Method called on error
+
+  // Don't mess with it unless our error handler is installed.
+If ($installedErrorHandler_t=newErrorHandler_t)
+	ON ERR CALL(oldErrorHandler_t)
+End if 
+
+$0:=UTIL_ERR_4DError_l

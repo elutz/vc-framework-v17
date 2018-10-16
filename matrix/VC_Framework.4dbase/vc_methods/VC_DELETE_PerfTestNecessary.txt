@@ -1,0 +1,44 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 05/12/14, 15:37:40
+  // ----------------------------------------------------
+  // Description:
+  //   Detect if it's necessary to run the deletion
+  //   performance test or not.
+  //
+  //   It is generally assumed it needs to run, but there
+  //   are several ways to turn it off.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($0;$perfTestIsNecessary_f)
+
+  // Default true
+$perfTestIsNecessary_f:=True
+
+
+  // Don't even test it until it's executed a few times...this will take at least 15 seconds.
+If (VCM_METHOD_MGPcount_l<=3)
+	$perfTestIsNecessary_f:=False
+End if 
+
+
+  // I only want to do this in single-user, not client (because it runs on the server) or server.
+If ((Application type=4D Server) | (Application type=4D Remote mode))
+	  // If it's running on the server it wouldn't pause design mode for the client.
+	$perfTestIsNecessary_f:=False
+End if 
+
+
+  // If the user chooses to ignore the performance for this session.
+If (VC_DELETE_IgnoreOnce_f=True)
+	$perfTestIsNecessary_f:=False
+End if 
+
+
+  // The user has chosent to ignore the performance issue permanently.
+If (<>VCM_DeleteIgnore_f)
+	$perfTestIsNecessary_f:=False
+End if 
+
+
+$0:=$perfTestIsNecessary_f

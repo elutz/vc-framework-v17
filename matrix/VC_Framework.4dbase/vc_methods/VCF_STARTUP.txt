@@ -1,0 +1,57 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/11/14, 14:32:48
+  // ----------------------------------------------------
+  // Description:
+  //   Startup code for the form export module.
+  //
+  //   Should only be called by VC_STARTUP_Process.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($error_l)
+C_TEXT($formsRootFolderName_t;$formsRootFolderPath_t)
+
+  // There's a bevy of text constants that I used when generating the exported form.
+VCF_STARTUP_Set4DConstantLabels 
+
+VCF_STARTUP_SetKeyNames 
+
+
+  // ===================================================================================
+  // These global vars should only be set once per session.
+  // I.e. they're "constants", the value should never change.
+
+  // These are used to set up the global constant vars.
+$formsRootFolderName_t:="vc_forms"
+$formsRootFolderPath_t:=Get 4D folder(Database folder;*)+$formsRootFolderName_t
+
+  // Because method paths from 4D are stored in POSIX format, I
+  // decided to store my form paths in POSIX as well.
+  // In order to convert a POSIX path to system with "Convert
+  // path POSIX to system", it must be absolute.
+  // So I don't really need the root folder in system syntax, I
+  // need it in POSIX syntax to refer to later.
+C_TEXT(<>VCF_ROOT_POSIX_t)
+<>VCF_ROOT_POSIX_t:=Convert path system to POSIX($formsRootFolderPath_t;*)
+
+
+  // ===================================================================================
+  // Set up the external database.
+
+  // Set the initial stamp value, but don't overwrite if it already exists.
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VCF_LABEL_Stamp_t;"0";False)
+End if 
+
+
+  // ===================================================================================
+  // Set up default process parameters.
+
+  // None for now.
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

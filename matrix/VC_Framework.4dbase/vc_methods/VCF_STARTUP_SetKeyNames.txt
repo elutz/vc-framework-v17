@@ -1,0 +1,42 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 06/27/14, 16:53:54
+  // ----------------------------------------------------
+  // Description:
+  //   Names from various key/value pairs. Used for
+  //   C_OBJECTs.
+  //
+  //   This is done to avoid "magic numbers" in the source.
+  // --[HEADEREND]---------------------------------------
+C_TEXT(<>VCF_KEY_ParamTableNum_t)
+C_TEXT(<>VCF_KEY_ParamFormName_t)
+C_TEXT(<>VCF_KEY_ParamForm_t)
+C_TEXT(<>VCF_KEY_ParamStamp_t)
+
+<>VCF_KEY_ParamTableNum_t:="tableNum"
+<>VCF_KEY_ParamFormName_t:="formName"
+<>VCF_KEY_ParamForm_t:="theForm"
+<>VCF_KEY_ParamStamp_t:="filterStamp"
+
+C_TEXT(<>VCF_KEY_ErrorCode_t)
+
+<>VCF_KEY_ErrorCode_t:="errorCode"
+
+C_TEXT(<>VCF_KEY_metaFormPath_t)
+
+<>VCF_KEY_metaFormPath_t:="_formPath"
+
+C_TEXT(<>VCF_KEY_formMetaData_t)
+
+<>VCF_KEY_formMetaData_t:="formMetaData"
+
+C_TEXT(<>VCF_KEY_formName_t)
+C_TEXT(<>VCF_KEY_tableName_t)
+C_TEXT(<>VCF_KEY_formNameInvalid_t)
+C_TEXT(<>VCF_KEY_tableNameInvalid_t)
+
+<>VCF_KEY_formName_t:="formName"
+<>VCF_KEY_tableName_t:="tableName"
+<>VCF_KEY_formNameInvalid_t:="formNameInvalid"
+<>VCF_KEY_tableNameInvalid_t:="tableNameInvalid"

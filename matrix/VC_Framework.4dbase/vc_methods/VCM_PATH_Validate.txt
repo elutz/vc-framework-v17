@@ -1,0 +1,129 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Method Export","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/18/12, 15:33:53
+  // ----------------------------------------------------
+  // Description:
+  //   Validate the parts that make up method paths.  In
+  //   particular table names, form names, and method
+  //   names must conform to 4D identifier rules.
+  //
+  //   This is necessary because invalid characters will
+  //   prevent the ability to create the file on disk for
+  //   the method.  It's true the Design Object Access will
+  //   escape certain characters for you, but not invalid
+  //   identifier characters.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$methodPath_t)
+
+C_OBJECT($0;$error_o)
+
+C_TEXT($objectName_t;$formObjectName_t;$tableName_t)
+C_LONGINT($error_l;$methodType_l)
+C_POINTER($table_p)
+C_BOOLEAN($checkTable_f;$checkObjectName_f;$checkFormObjectName_f)
+C_BOOLEAN($tableNameInvalid_f;$ObjectNameInvalid_f;$FormObjectNameInvalid_f)
+C_OBJECT($methodMetaData_o)
+
+$methodPath_t:=$1
+
+OB SET($error_o;<>VCM_KEY_ErrorCode_t;0)  // Indicates path is valid.
+
+$checkFormObjectName_f:=False
+$checkObjectName_f:=False
+$checkTable_f:=False
+$tableNameInvalid_f:=False
+$ObjectNameInvalid_f:=False
+$FormObjectNameInvalid_f:=False
+
+UTIL_ERR_HandlerInstall 
+METHOD RESOLVE PATH($methodPath_t;$methodType_l;$table_p;$objectName_t;$formObjectName_t;*)
+$error_l:=UTIL_ERR_HandlerRemove 
+
+
+  // Use the method type to determine what to check.
+If ($error_l=0)
+	  // Table names, form names, and method names must conform to 4D identifier rules.
+	Case of 
+		: ($methodType_l=Path project method)
+			$checkObjectName_f:=True
+			
+		: ($methodType_l=Path table form)
+			$checkObjectName_f:=True
+			$checkFormObjectName_f:=True
+			$checkTable_f:=True
+			
+		: ($methodType_l=Path project form)
+			$checkObjectName_f:=True
+			$checkFormObjectName_f:=True
+			
+		: ($methodType_l=Path trigger)
+			$checkTable_f:=True
+			
+		: ($methodType_l=Path database method)
+			  // Do nothing, database methods can't be invalid.
+			
+		Else 
+			  // Should never happen, there are no other method types in Design Object Access.
+			$error_l:=<>ERR_METH_BadType_l
+	End case 
+End if 
+
+
+  // Check $formObjectName_t; could be a form method, or an object method.
+If ($error_l=0)
+	If ($checkFormObjectName_f)
+		If ($formObjectName_t="")
+			  // It's the form method, Design Object Access doesn't resolve a name (returns empty string).
+			  // The file will be named {formMethod} but this name won't pass 4D's identifier rules so this is a special case.
+			$FormObjectNameInvalid_f:=False
+		Else 
+			$FormObjectNameInvalid_f:=Not(UTIL_IsIdentifier ($formObjectName_t))
+		End if 
+	End if 
+End if 
+
+
+  // Check the table name.
+If ($error_l=0)
+	If ($checkTable_f)
+		$tableName_t:=Table name($table_p)
+		$tableNameInvalid_f:=Not(UTIL_IsIdentifier ($tableName_t))
+	End if 
+End if 
+
+
+  // Check the "object" name; could be a project method name or form name.
+If ($error_l=0)
+	If ($checkObjectName_f)
+		$ObjectNameInvalid_f:=Not(UTIL_IsIdentifier ($objectName_t))
+	End if 
+End if 
+
+
+  // This method creates a bunch of metadata that is useful for later logging.
+  // Rather than create the metadata again during logging, I'll just return the data.
+If ($ObjectNameInvalid_f | $FormObjectNameInvalid_f | $tableNameInvalid_f)
+	$error_l:=<>WARN_ASSET_BadName_L
+	OB SET($error_o;<>VCM_KEY_ErrorCode_t;$error_l)
+	
+	OB SET($methodMetaData_o;<>VCM_KEY_methodType_t;$methodType_l)
+	OB SET($methodMetaData_o;<>VCM_KEY_tableName_t;$tableName_t)
+	OB SET($methodMetaData_o;<>VCM_KEY_objectName_t;$objectName_t)
+	OB SET($methodMetaData_o;<>VCM_KEY_formObjectName_t;$formObjectName_t)
+	OB SET($methodMetaData_o;<>VCM_KEY_tableNameInvalid_t;$tableNameInvalid_f)
+	OB SET($methodMetaData_o;<>VCM_KEY_objectNameInvalid_t;$ObjectNameInvalid_f)
+	OB SET($methodMetaData_o;<>VCM_KEY_formObjectNameInvalid_t;$FormObjectNameInvalid_f)
+	
+	OB SET($error_o;<>VCM_KEY_methodMetaData_t;$methodMetaData_o)
+End if 
+
+
+  // <>WARN_ASSET_BadName_L doesn't stop the validation.
+If (($error_l#0) & ($error_l#<>WARN_ASSET_BadName_L))
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+
+$0:=$error_o
+

@@ -1,0 +1,77 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework External Database","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/20/12, 16:44:21
+  // ----------------------------------------------------
+  // Description:
+  //   Insert a log record into the log table.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$assetPath_t)
+C_TEXT($2;$assetType_t)
+C_OBJECT($3;$assetMetaData_o)
+
+C_LONGINT($0;$error_l)
+
+C_LONGINT($exists_l)
+C_TEXT($assetMetaData_t)
+
+$assetPath_t:=$1
+$assetType_t:=$2
+$assetMetaData_o:=$3
+$assetMetaData_t:=JSON Stringify($assetMetaData_o)
+
+  // Open external database.
+$error_l:=VC_EXT_Open 
+
+If ($error_l=0)
+	
+	UTIL_ERR_HandlerInstall 
+	
+	  // Check to see if this asset's already been logged.
+	Begin SQL
+		SELECT COUNT( ID )
+		FROM VC_PathErrorLog
+		WHERE path = :$assetPath_t
+		AND type = :$assetType_t
+		INTO :$exists_l;
+	End SQL
+	
+	If ($exists_l=0)
+		  // It does not exist, create it.
+		Begin SQL
+			INSERT INTO VC_PathErrorLog 
+			(
+			   path,
+			   type,
+			   metadata,
+			   userWarned
+			)
+			VALUES
+			(
+			   :$assetPath_t,
+			   :$assetType_t,
+			   :$assetMetaData_o,
+			   False
+			);
+		End SQL
+	Else 
+		  // It already exists, warn the user again.
+		Begin SQL
+			UPDATE VC_PathErrorLog
+			SET userWarned = FALSE
+			WHERE path = :$assetPath_t
+			AND type = :$assetType_t;
+		End SQL
+	End if 
+	
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

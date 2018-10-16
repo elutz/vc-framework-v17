@@ -1,0 +1,24 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 01/14/14, 11:28:23
+  // ----------------------------------------------------
+  // Description:
+  //   Set the flag to indicate if the deletion detection
+  //   stored procedure will run or not.
+  //
+  //   If you change this manually you're responsible for
+  //   starting or stopping the process for the current
+  //   session.  I.e. the value is only checked at startup.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($1;$deleteProcDisabled_f)
+
+C_LONGINT($error_l)
+
+$deleteProcDisabled_f:=$1
+
+$error_l:=VC_EXT_PrefSet (<>VC_LABEL_DeleteProcDisabled_t;String($deleteProcDisabled_f))
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+End if 

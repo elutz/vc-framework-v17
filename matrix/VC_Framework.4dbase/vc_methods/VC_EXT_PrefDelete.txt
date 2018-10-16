@@ -1,0 +1,56 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/18/14, 17:53:42
+  // ----------------------------------------------------
+  // Description:
+  //   Delete indicated preference.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$prefLabel_t)
+
+C_LONGINT($0;$error_l)
+
+C_LONGINT($prefExists_l)
+
+$prefLabel_t:=$1
+
+  // Open external database.
+$error_l:=VC_EXT_Open 
+
+If ($error_l=0)
+	  // Check to see if the pref exists.
+	  // This isn't necessary in order to delete it but I
+	  // just want to provide the opportunity for the caller
+	  // to know if it's already been deleted.
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		SELECT COUNT( ID )
+		FROM VC_Prefs
+		WHERE prefName = :$prefLabel_t
+		INTO :$prefExists_l;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+If ($error_l=0)
+	If ($prefExists_l=0)
+		  // The preference doesn't exist.
+		$error_l:=<>ERR_PREF_NotFound_l
+	Else 
+		UTIL_ERR_HandlerInstall 
+		Begin SQL
+			DELETE FROM VC_Prefs
+			WHERE prefName = :$prefLabel_t;
+		End SQL
+		$error_l:=UTIL_ERR_HandlerRemove 
+	End if 
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

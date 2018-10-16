@@ -1,0 +1,24 @@
+﻿  //%attributes = {"invisible":true,"executedOnServer":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/16/14, 11:52:26
+  // ----------------------------------------------------
+  // Description:
+  //   Get path to external database file.
+  //
+  //   Executes on server.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($0;$externalDatabasePath_t)
+
+C_BOOLEAN(<>VC_Enabled_f)
+C_TEXT(<>VC_Database_t)
+
+If (<>VC_Enabled_f)
+	
+	$externalDatabasePath_t:=<>VC_Database_t
+	
+Else 
+	$externalDatabasePath_t:=UTIL_ERR_GetErrorMessage (<>ERR_VC_NotEnabled_l)
+End if 
+
+$0:=$externalDatabasePath_t

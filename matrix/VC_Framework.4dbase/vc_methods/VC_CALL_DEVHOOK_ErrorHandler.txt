@@ -1,0 +1,21 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Devhook","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 10/12/12, 11:20:51
+  // ----------------------------------------------------
+  // Description:
+  //   Error handler for devhook callbacks. Really this
+  //   only handles a single error: if the devhook
+  //   doesn't exist, then the component behaves as
+  //   default.
+  //
+  //   The important thing is the devhook host should
+  //   handle *all other errors*.
+  // --[HEADEREND]---------------------------------------
+  // Set up default error handling vars.
+UTIL_ERR_GenericHandler 
+
+If (UTIL_ERR_4DError_l#-10508)
+	  // The Implementing host should handle all other errors.
+	  // This needs to bubble up and disable the export.
+End if 

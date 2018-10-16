@@ -1,0 +1,413 @@
+<html xmlns:date="http://exslt.org/dates-and-times">
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="./CSS/default.css">
+<title>MISC I</title>
+</head>
+<body>
+<h1>MISC I</h1>
+<p>
+<span class="title">Plugin Identifier: </span>20000</p>
+<p>
+<span class="title">Summary</span>
+</p>
+<ex4D:plugin-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for MISC I here -->
+<p>A collection of (hopefully) useful tools.</p>
+</ex4D:plugin-description>
+<a name="command:1"></a>
+<h2>Picture</h2>
+<a name="command:1,1"></a>
+<h3>PICTURE GET RAW DATA</h3>
+<p>
+<code>PICTURE GET RAW DATA (picture; formats; pictures)</code>
+</p>
+<p>
+<code>picture (PICTURE)</code>
+</p>
+<ex4D:argument argument-id="1" label="picture" type="P" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $1 (PICTURE) here-->
+<p>The 4D picture to examine.</p>
+</ex4D:argument>
+<p>
+<code>formats (ARRAY)</code>
+</p>
+<ex4D:argument argument-id="2" label="formats" type="Y" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $2 (ARRAY) here-->
+<p>Array of text that decribe the picture format, i.e. the extensions, MIME types and OS types.</p>
+</ex4D:argument>
+<p>
+<code>pictures (ARRAY)</code>
+</p>
+<ex4D:argument argument-id="3" label="pictures" type="Y" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $3 (ARRAY) here-->
+<p>Array of pictures in their native formats.</p>
+</ex4D:argument>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for PICTURE GET RAW DATA here -->
+<p>Retrives the raw picture data and format description from a given 4D picture.</p>
+</ex4D:command-description>
+<a name="command:2"></a>
+<h2>Stack</h2>
+<a name="command:2,2"></a>
+<h3>STACK Get available size</h3>
+<p>
+<code>size:=STACK Get available size</code>
+</p>
+<p>
+<code>size</code> (LONGINT)<br>
+<ex4D:return-value label="size" type="L" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for return value (LONGINT) here-->
+<p>The amount of free stack.</p>
+</ex4D:return-value>
+</p>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for STACK Get available size here -->
+<p>This function returns the amount of stack available.</p>
+</ex4D:command-description>
+<a name="command:3"></a>
+<h2>Process</h2>
+<a name="command:3,3"></a>
+<h3>PROCESS GET LIST</h3>
+<p>
+<code>PROCESS GET LIST (names; paths; numbers)</code>
+</p>
+<p>
+<code>names (ARRAY)</code>
+</p>
+<ex4D:argument argument-id="1" label="names" type="Y" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $1 (ARRAY) here-->
+<p>Process names.</p>
+</ex4D:argument>
+<p>
+<code>paths (ARRAY)</code>
+</p>
+<ex4D:argument argument-id="2" label="paths" type="Y" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $2 (ARRAY) here-->
+<p>Process paths.</p>
+</ex4D:argument>
+<p>
+<code>numbers (ARRAY)</code>
+</p>
+<ex4D:argument argument-id="3" label="numbers" type="Y" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $3 (ARRAY) here-->
+<p>Process numbers.</p>
+</ex4D:argument>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for PROCESS GET LIST here -->
+<p>The receiving 3 arrays must be declared appropriately prior to call. On Windows the <a href="http://msdn.microsoft.com/en-us/library/ms682489(VS.85).aspx">CreateToolhelp32Snapshot</a> function is used. On Mac, the <a href="http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/ApplicationKit/Classes/NSWorkspace_Class/Reference/Reference.html%23//apple_ref/doc/uid/TP40004153">NSWorkspace</a> class is used.</p>
+</ex4D:command-description>
+<a name="command:3,4"></a>
+<h3>PROCESS Get id</h3>
+<p>
+<code>process:=PROCESS Get id</code>
+</p>
+<p>
+<code>process</code> (LONGINT)<br>
+<ex4D:return-value label="process" type="L" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for return value (LONGINT) here-->
+<p>The process number of the current application.</p>
+</ex4D:return-value>
+</p>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for PROCESS Get id here -->
+</ex4D:command-description>
+<a name="command:4"></a>
+<h2>System</h2>
+<a name="command:4,7"></a>
+<h3>SYSTEM Generate UUID</h3>
+<p>
+<code>uuid:=SYSTEM Generate UUID</code>
+</p>
+<p>
+<code>uuid</code> (TEXT)<br>
+<ex4D:return-value label="uuid" type="T" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for return value (TEXT) here-->
+</ex4D:return-value>
+</p>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for SYSTEM Generate UUID here -->
+<p>This command generates a UUID in 7B01F15A-2222-4708-A7DA-2670E498454B format. Internally the function <a href="http://developer.apple.com/library/mac/#DOCUMENTATION/CoreFoundation/Reference/CFUUIDRef/Reference/reference.html">CFUUIDCreate</a> is used on Mac and <a href="http://msdn.microsoft.com/en-us/library/aa379205(VS.85).aspx">UuidCreate</a> on Windows. The value is also converted to uppercase on Windows to unify the format.</p>
+</ex4D:command-description>
+<a name="command:4,5"></a>
+<h3>SYSTEM Get timestamp</h3>
+<p>
+<code>timestamp:=SYSTEM Get timestamp</code>
+</p>
+<p>
+<code>timestamp</code> (TEXT)<br>
+<ex4D:return-value label="timestamp" type="T" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for return value (TEXT) here-->
+</ex4D:return-value>
+</p>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for SYSTEM Get timestamp here -->
+<p>This command returns the current time in 2010-10-23T02:53:00Z format.</p>
+</ex4D:command-description>
+<a name="command:4,6"></a>
+<h3>SYSTEM Get timestring</h3>
+<p>
+<code>timestring:=SYSTEM Get timestring</code>
+</p>
+<p>
+<code>timestring</code> (TEXT)<br>
+<ex4D:return-value label="timestring" type="T" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for return value (TEXT) here-->
+</ex4D:return-value>
+</p>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for SYSTEM Get timestring here -->
+<p>This command returns the current time in Sat, 23 Oct 10 02:53:00 GMT format.</p>
+</ex4D:command-description>
+<a name="command:4,8"></a>
+<h3>SYSTEM Get unixtime</h3>
+<p>
+<code>unixtime:=SYSTEM Get unixtime</code>
+</p>
+<p>
+<code>unixtime</code> (TEXT)<br>
+<ex4D:return-value label="unixtime" type="T" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for return value (TEXT) here-->
+</ex4D:return-value>
+</p>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for SYSTEM Get unixtime here -->
+<p>This command returns the current time in 1287802380 format.</p>
+</ex4D:command-description>
+<a name="command:5"></a>
+<h2>Structure</h2>
+<a name="command:5,9"></a>
+<h3>STRUCTURE Import definition</h3>
+<p>
+<code>error:=STRUCTURE Import definition (xml)</code>
+</p>
+<p>
+<code>xml (TEXT)</code>
+</p>
+<ex4D:argument argument-id="1" label="xml" type="T" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $1 (TEXT) here-->
+<p>The structure defintion. You can create one from the Structure Edtitor.</p>
+</ex4D:argument>
+<p>
+<code>error</code> (LONGINT)<br>
+<ex4D:return-value label="error" type="L" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for return value (LONGINT) here-->
+<p>Error code.</p>
+</ex4D:return-value>
+</p>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for STRUCTURE Import definition here -->
+<p>This command call the plugin entry point to add tables, fields, relations from an XML definition.</p>
+</ex4D:command-description>
+<a name="command:6"></a>
+<h2>Volume</h2>
+<a name="command:6,11"></a>
+<h3>VOLUME Is ejectable</h3>
+<p>
+<code>success:=VOLUME Is ejectable (volume; ejectable)</code>
+</p>
+<p>
+<code>volume (TEXT)</code>
+</p>
+<ex4D:argument argument-id="1" label="volume" type="T" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $1 (TEXT) here-->
+<p>The volume name, as returned from the VOLUME LIST command.</p>
+<p>Alternatively, a file path or folder path.</p>
+</ex4D:argument>
+<p>
+<code>ejectable (LONGINT)</code>
+</p>
+<ex4D:argument argument-id="2" label="ejectable" type="L" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $2 (LONGINT) here-->
+<p>1, if ejectable.</p>
+</ex4D:argument>
+<p>
+<code>success</code> (LONGINT)<br>
+<ex4D:return-value label="success" type="L" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for return value (LONGINT) here-->
+<p>1, on success.</p>
+</ex4D:return-value>
+</p>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for VOLUME Is ejectable here -->
+</ex4D:command-description>
+<a name="command:6,10"></a>
+<h3>VOLUME Is remote</h3>
+<p>
+<code>success:=VOLUME Is remote (volume; remote)</code>
+</p>
+<p>
+<code>volume (TEXT)</code>
+</p>
+<ex4D:argument argument-id="1" label="volume" type="T" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $1 (TEXT) here-->
+<p>The volume name, as returned from the VOLUME LIST command.</p>
+<p>Alternatively, a file path or folder path.</p>
+</ex4D:argument>
+<p>
+<code>remote (LONGINT)</code>
+</p>
+<ex4D:argument argument-id="2" label="remote" type="L" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $2 (LONGINT) here-->
+<p>1, if remote.</p>
+</ex4D:argument>
+<p>
+<code>success</code> (LONGINT)<br>
+<ex4D:return-value label="success" type="L" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for return value (LONGINT) here-->
+<p>1, on success.</p>
+</ex4D:return-value>
+</p>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for VOLUME Is remote here -->
+</ex4D:command-description>
+<a name="command:7"></a>
+<h2>Get Path</h2>
+<a name="command:7,13"></a>
+<h3>PATH From user selection</h3>
+<p>
+<code>path:=PATH From user selection (file; folder; title)</code>
+</p>
+<p>
+<code>file (TEXT)</code>
+</p>
+<ex4D:argument argument-id="1" label="file" type="T" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $1 (TEXT) here-->
+<p>The initial file name to present in the dialog.</p>
+</ex4D:argument>
+<p>
+<code>folder (TEXT)</code>
+</p>
+<ex4D:argument argument-id="2" label="folder" type="T" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $2 (TEXT) here-->
+<p>The directory path of the initial location to present.</p>
+</ex4D:argument>
+<p>
+<code>title (TEXT)</code>
+</p>
+<ex4D:argument argument-id="3" label="title" type="T" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $3 (TEXT) here-->
+<p>The message to show on the window title.</p>
+</ex4D:argument>
+<p>
+<code>path</code> (TEXT)<br>
+<ex4D:return-value label="path" type="T" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for return value (TEXT) here-->
+<p>The file path.</p>
+</ex4D:return-value>
+</p>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for PATH From user selection here -->
+<p>This command presents the standard save file dialog, without actually creating any file.</p>
+</ex4D:command-description>
+<a name="command:7,12"></a>
+<h3>PATH Get known folder</h3>
+<p>
+<code>path:=PATH Get known folder (type)</code>
+</p>
+<p>
+<code>type (LONGINT)</code>
+</p>
+<ex4D:argument argument-id="1" label="type" type="L" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for $1 (LONGINT) here-->
+<p>The selector to specify which directory you want to search.</p>
+</ex4D:argument>
+<p>You can use a <a href="#constant:1">Known Folder Path</a> constant for <code>type</code>.</p>
+<p>
+<code>path</code> (TEXT)<br>
+<ex4D:return-value label="path" type="T" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for return value (TEXT) here-->
+<p>The file path.</p>
+</ex4D:return-value>
+</p>
+<p>
+<span class="title">Discussion</span>
+</p>
+<ex4D:command-description xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for PATH Get known folder here -->
+<p>This commmand returns the file path of specific directories on the system. It can be useful, for example, to find out the actual path to My Documents on Windows, which maybe moved to a non standard location.</p>
+</ex4D:command-description>
+<a name="constant:1"></a>
+<h2>Known Folder Path</h2>
+<p>
+<code><a name="constant:1,1"></a>WIN My Documents (0)</code>
+</p>
+<ex4D:constant constant-id="1" name="WIN My Documents" type="L" value="0" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for WIN My Documents (0) here-->
+</ex4D:constant>
+<p>
+<code><a name="constant:1,5"></a>MAC Documents (0)</code>
+</p>
+<ex4D:constant constant-id="5" name="MAC Documents" type="L" value="0" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for MAC Documents (0) here-->
+</ex4D:constant>
+<p>
+<code><a name="constant:1,2"></a>WIN App Data Local (1)</code>
+</p>
+<ex4D:constant constant-id="2" name="WIN App Data Local" type="L" value="1" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for WIN App Data Local (1) here-->
+</ex4D:constant>
+<p>
+<code><a name="constant:1,6"></a>MAC App Support User (1)</code>
+</p>
+<ex4D:constant constant-id="6" name="MAC App Support User" type="L" value="1" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for MAC App Support User (1) here-->
+</ex4D:constant>
+<p>
+<code><a name="constant:1,3"></a>WIN App Data Common (2)</code>
+</p>
+<ex4D:constant constant-id="3" name="WIN App Data Common" type="L" value="2" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for WIN App Data Common (2) here-->
+</ex4D:constant>
+<p>
+<code><a name="constant:1,7"></a>MAC App Support Local (2)</code>
+</p>
+<ex4D:constant constant-id="7" name="MAC App Support Local" type="L" value="2" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for MAC App Support Local (2) here-->
+</ex4D:constant>
+<p>
+<code><a name="constant:1,4"></a>WIN App Data Roaming (3)</code>
+</p>
+<ex4D:constant constant-id="4" name="WIN App Data Roaming" type="L" value="3" xmlns:ex4D="http://www.4d.com/plugin">
+<!-- write documentation for WIN App Data Roaming (3) here-->
+</ex4D:constant>
+<p class="footer">
+<span class="title">Documentation Update: </span>2012-05-24T13:14:5209:00</p>
+</body>
+</html>

@@ -1,0 +1,50 @@
+﻿  //%attributes = {"invisible":true,"folder":"Generic Methods","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 05/22/12, 17:33:41
+  // ----------------------------------------------------
+  // Description:
+  //   Delete folder and all contents.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$folder_t)
+
+C_LONGINT($numDocs_l;$numFolders_l;$currentFile_l)
+C_TEXT($currentFile_t)
+
+ARRAY TEXT($docList_at;0)
+ARRAY TEXT($folderList_at;0)
+
+$folder_t:=$1
+
+If (Test path name($folder_t)=Is a folder)
+	
+	  // Make sure the path ends with a separator for convenience (i.e. appending file names).
+	If ($folder_t[[Length($folder_t)]]#Folder separator)
+		$folder_t:=$folder_t+Folder separator
+	End if 
+	
+	  // Delete all files from the current folder.
+	DOCUMENT LIST($folder_t;$docList_at)
+	$numDocs_l:=Size of array($docList_at)
+	For ($currentFile_l;1;$numDocs_l)
+		$currentFile_t:=$folder_t+$docList_at{$currentFile_l}
+		DELETE DOCUMENT($currentFile_t)
+		  // Deletion can lag a little, and the folder can't be deleted unless it's empty.
+		Repeat 
+			IDLE
+		Until (Test path name($currentFile_t)#Is a document)
+	End for 
+	
+	  // Delete all folders within the current folder.
+	FOLDER LIST($1;$folderList_at)
+	$numFolders_l:=Size of array($folderList_at)
+	For ($currentFile_l;1;$numFolders_l)
+		UTIL_FOLDER_Delete ($folder_t+$folderList_at{$currentFile_l})
+	End for 
+	
+	  // Delete the current (now empty) folder.
+	DELETE FOLDER($folder_t)
+	Repeat 
+		IDLE
+	Until (Test path name($folder_t)#Is a folder)
+End if 

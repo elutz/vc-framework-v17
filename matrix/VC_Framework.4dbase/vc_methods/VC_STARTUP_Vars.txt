@@ -1,0 +1,92 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/28/14, 15:53:14
+  // ----------------------------------------------------
+  // Description:
+  //   Set up IP vars.
+  //
+  //   Moved this to a subroutine so I can call it at
+  //   runtime (the startup code is designed to run only
+  //   once).
+  // --[HEADEREND]---------------------------------------
+C_TEXT($logFileName_t)
+
+  // ===================================================================================
+  // Global variables, used for startup.
+
+  // This is used to indicate that the startup code is completed and the component is
+  // ready to go.
+C_BOOLEAN(<>VC_Enabled_f)
+
+
+  // ===================================================================================
+  // Global variables, used throughout the component.
+
+  // Global quit flag.
+C_BOOLEAN(<>VC_Quit_f)
+
+  // Global flags to stop the background monitor process (and prevent from relaunching too).
+C_BOOLEAN(<>VC_StopExport_f;<>VC_StopDelete_f)
+
+  // Global error flag, if there's an error, code export is disabled.
+C_BOOLEAN(<>VC_Error_f)
+
+
+  // ===================================================================================
+  // Global variables where the value is actually data.
+  // This value is actually stored in the data but as an
+  // optimization I can access the IP var instead of going
+  // to the data file every time (e.g. in a loop).  The
+  // setter for this value also updates the IP var.
+
+  // Value used by DELAY PROCESS for the background processes.
+C_LONGINT(<>VC_DeleteProcDelay_l;<>VC_ExportProcDelay_l)
+
+  // Module enablers, turn export on or off.
+C_BOOLEAN(<>VC_ExportForms_f)
+C_BOOLEAN(<>VC_ExportMethods_f)
+
+  // Support exiting the processes gracefully.
+C_BOOLEAN(<>VC_DeleteProcDone_f;<>VC_ExportProcDone_f)
+
+
+  // ===================================================================================
+  // These global vars should only be set once per session.
+  // I.e. they're "constants", the value should never change.
+
+  // These are used to set up the global constant vars.
+$logFileName_t:="vc_errors.txt"
+
+  // Component name used for various dialogs and messages.
+C_TEXT(<>VC_ComponentName_t)
+<>VC_ComponentName_t:=UTIL_4D_GetDatabaseName 
+
+  // Log file for invalid paths (see VC_EXT_LogSave)
+C_TEXT(<>VC_EXT_LogFile_t)
+<>VC_EXT_LogFile_t:=Get 4D folder(Logs folder;*)+"vc_errors.txt"
+
+  // VC actions, used to determine which callback to call.
+C_TEXT(<>VC_ACTION_Create_t)
+C_TEXT(<>VC_ACTION_Update_t)
+C_TEXT(<>VC_ACTION_Delete_t)
+
+<>VC_ACTION_Create_t:="create"
+<>VC_ACTION_Update_t:="update"
+<>VC_ACTION_Delete_t:="delete"
+
+  // Asset state, used to track deleted assets mainly.
+  // That is to say a record will persist for deleted
+  // assets, but be ignored on subsequent queries.
+C_TEXT(<>VC_STATE_Active_t)
+C_TEXT(<>VC_STATE_Deleted_t)
+
+<>VC_STATE_Active_t:="active"
+<>VC_STATE_Deleted_t:="deleted"
+
+  // Types of assets that can be saved.
+C_TEXT(<>VC_TYPE_Method_t)
+C_TEXT(<>VC_TYPE_Form_t)
+
+<>VC_TYPE_Method_t:="method"
+<>VC_TYPE_Form_t:="form"

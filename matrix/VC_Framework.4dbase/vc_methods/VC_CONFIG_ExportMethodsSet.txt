@@ -1,0 +1,22 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/28/14, 11:33:44
+  // ----------------------------------------------------
+  // Description:
+  //   Enable or disable method export.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($1;$exportMethods_f)
+
+C_LONGINT($error_l)
+
+$exportMethods_f:=$1
+
+$error_l:=VC_EXT_PrefSet (<>VC_LABEL_ExportMethods_t;String($exportMethods_f))
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+Else 
+	  // Make sure to update IP var.
+	<>VC_ExportMethods_f:=$exportMethods_f
+End if 

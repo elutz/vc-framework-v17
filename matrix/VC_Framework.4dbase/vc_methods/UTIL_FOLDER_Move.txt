@@ -1,0 +1,74 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/16/14, 16:13:20
+  // ----------------------------------------------------
+  // Description:
+  //   Move/rename a folder.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$source_t)
+C_TEXT($2;$destination_t)
+
+C_BOOLEAN($0;$success_f)  // Simple true/false error handling, you need to trace it if you want more details.
+
+C_TEXT($command_t)
+
+C_BLOB($inputStream_b;$outputStream_b;$errorStream_b)
+C_TEXT($inputStream_t;$outputStream_t;$errorStream_t)
+
+$source_t:=$1
+$destination_t:=$2
+
+If (Test path name($source_t)#Is a folder)
+	$success_f:=False
+Else 
+	$success_f:=True
+End if 
+
+If ($success_f)
+	If (Test path name($source_t)#Is a folder)
+		$success_f:=False
+	End if 
+End if 
+
+If ($success_f)
+	
+	If (UTIL_IsMac )
+		  // Convert HFS paths to POSIX if necessary.
+		If (Position(":";$source_t)>0)
+			$source_t:=Convert path system to POSIX($source_t)
+			$destination_t:=Convert path system to POSIX($destination_t)
+		End if 
+		  // Use mv.
+		$command_t:="mv -f"
+		
+	Else 
+		  // Convert POSIX paths to system if necessary.
+		If (Position("/";$source_t)>0)
+			$source_t:=Convert path POSIX to system($source_t)
+			$destination_t:=Convert path POSIX to system($destination_t)
+		End if 
+		
+		  // For Windows the destination needs to be the folder name only, not a path.
+		$destination_t:=UTIL_PATH_GetFileName ($destination_t)
+		
+		  // Use ren.
+		$command_t:="cmd.exe /C ren "
+	End if 
+	
+	$command_t:=$command_t+" \""+$source_t+"\" \""+$destination_t+"\""
+	
+	
+	SET ENVIRONMENT VARIABLE("_4D_OPTION_HIDE_CONSOLE";"true")
+	LAUNCH EXTERNAL PROCESS($command_t;$inputStream_b;$outputStream_b;$errorStream_b)
+	
+	$inputStream_t:=Convert to text($inputStream_b;"UTF-8")
+	$outputStream_t:=Convert to text($outputStream_b;"UTF-8")
+	$errorStream_t:=Convert to text($errorStream_b;"UTF-8")
+	
+	If ($errorStream_t#"")
+		$success_f:=True
+	End if 
+End if 
+
+$0:=$success_f

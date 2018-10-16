@@ -1,0 +1,248 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/11/14, 16:28:20
+  // ----------------------------------------------------
+  // Description:
+  //   Given the changes in the database, perform them in
+  //   the file system.
+  //
+  //   This is currently being executed by the VC_EXPORT_
+  //   process, but it does not have to be. This could be
+  //   broken off into a separate process but I don't see
+  //   a compelling need at the moment and I would
+  //   probably need to add a synchronized execution
+  //   mechanism to make sure the different processes
+  //   don't stomp on each other.
+  // --[HEADEREND]---------------------------------------
+C_POINTER($1;$actionsToCheck_at_p)
+C_POINTER($2;$typesToCheck_at_p)
+
+C_LONGINT($0;$error_l)
+
+C_TEXT($statement_t;$currentActionToCheck_t;$currentTypeToCheck_t)
+C_LONGINT($i;$numActions_l;$numTypes_l)
+
+C_TEXT($currentAssetPath_t;$currentAssetAction_t;$currentAssetType_t;$newAction_t;$newState_t)
+C_LONGINT($numAssets_l;$currentAsset_l)
+
+C_TEXT($filePath_t;$filePathPOSIX_t;$fileContent_t)
+
+C_LONGINT($progThreshold_l;$progID_l)
+C_TEXT($progTitle_t)
+C_REAL($progress_r)
+
+ARRAY TEXT($actionsToCheck_at;0)
+ARRAY TEXT($typesToCheck_at;0)
+
+ARRAY TEXT($assetPaths_at;0)
+ARRAY TEXT($assetActions_at;0)
+ARRAY TEXT($assetTypes_at;0)
+
+If (Count parameters>=1)
+	$actionsToCheck_at_p:=$1
+	COPY ARRAY($actionsToCheck_at_p->;$actionsToCheck_at)
+Else 
+	APPEND TO ARRAY($actionsToCheck_at;<>VC_ACTION_Update_t)
+	APPEND TO ARRAY($actionsToCheck_at;<>VC_ACTION_Create_t)
+	APPEND TO ARRAY($actionsToCheck_at;<>VC_ACTION_Delete_t)
+End if 
+
+If (Count parameters>=2)
+	$typesToCheck_at_p:=$2
+	COPY ARRAY($typesToCheck_at_p->;$typesToCheck_at)
+Else 
+	APPEND TO ARRAY($typesToCheck_at;<>VC_TYPE_Form_t)
+	APPEND TO ARRAY($typesToCheck_at;<>VC_TYPE_Method_t)
+End if 
+
+  // Optimization since the rest of the methods will open and close a lot.
+$error_l:=VC_EXT_Open 
+
+If ($error_l=0)
+	
+	  // ===================================================================================
+	  // Query for assets.
+	$numActions_l:=Size of array($actionsToCheck_at)
+	$numTypes_l:=Size of array($typesToCheck_at)
+	
+	  // Note: this would fail in compiled mode because of the local
+	  // variables, but VC_Framework should never be run in compiled mode.
+	$statement_t:=""
+	$statement_t:=$statement_t+"SELECT path, action, type "
+	$statement_t:=$statement_t+"FROM VC_Assets "
+	$statement_t:=$statement_t+"WHERE ("
+	For ($i;1;$numActions_l)
+		$currentActionToCheck_t:=$actionsToCheck_at{$i}
+		If ($i#1)
+			$statement_t:=$statement_t+"OR "
+		End if 
+		$statement_t:=$statement_t+" action = '"+$currentActionToCheck_t+"' "
+	End for 
+	$statement_t:=$statement_t+") AND ("
+	For ($i;1;$numTypes_l)
+		$currentTypeToCheck_t:=$typesToCheck_at{$i}
+		If ($i#1)
+			$statement_t:=$statement_t+"OR "
+		End if 
+		$statement_t:=$statement_t+" type = '"+$currentTypeToCheck_t+"' "
+	End for 
+	$statement_t:=$statement_t+") INTO :$assetPaths_at, :$assetActions_at, :$assetTypes_at;"
+	
+	  // Get all records that have the requested actions.
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		EXECUTE IMMEDIATE :$statement_t;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+
+If ($error_l=0)
+	
+	$numAssets_l:=Size of array($assetPaths_at)
+	
+	If ($numAssets_l>0)
+		
+		  // ===================================================================================
+		  // Process assets.
+		
+		If (VC_ProgInstalled_f & (<>VC_Quit_f=False))
+			$progThreshold_l:=1000
+			$progTitle_t:=<>VC_ComponentName_t+" Processing Assets"
+			$progID_l:=PROG_Create ($progTitle_t;$numAssets_l;$progThreshold_l)
+		End if 
+		
+		$currentAsset_l:=1
+		
+		  // Loop over each path to check...
+		While (($currentAsset_l<=$numAssets_l) & ($error_l=0))
+			
+			$currentAssetPath_t:=$assetPaths_at{$currentAsset_l}
+			$currentAssetAction_t:=$assetActions_at{$currentAsset_l}
+			$currentAssetType_t:=$assetTypes_at{$currentAsset_l}
+			
+			If (VC_ProgInstalled_f & (<>VC_Quit_f=False))
+				$progress_r:=$currentAsset_l/$numAssets_l
+				PROG_Update ($progID_l;$progress_r;$currentAsset_l;$numAssets_l;$currentAssetAction_t+" "+$currentAssetType_t+" "+$currentAssetPath_t)
+			End if 
+			
+			  // Need the full path to the file.
+			Case of 
+				: ($currentAssetType_t=<>VC_TYPE_Method_t)
+					$filePathPOSIX_t:=<>VCM_ROOT_POSIX_T+"/"+$currentAssetPath_t+".txt"
+				: ($currentAssetType_t=<>VC_TYPE_Form_t)
+					$filePathPOSIX_t:=<>VCF_ROOT_POSIX_T+"/"+$currentAssetPath_t+".json"
+			End case 
+			$filePath_t:=Convert path POSIX to system($filePathPOSIX_t;*)
+			
+			
+			  // Check to make sure it's ok to perform the action.
+			Case of 
+				: ($currentAssetAction_t=<>VC_ACTION_Update_t)
+					  // Call back to implementing host to see if it is ok to update this file.
+					If (Not(VC_CALL_DEVHOOK_Update ($filePath_t)))
+						$error_l:=<>ERR_HOOK_UpdateFail_l
+					End if 
+					
+				: ($currentAssetAction_t=<>VC_ACTION_Create_t)
+					  // Call back to Implementing host to see if it is ok to create this file.
+					If (Not(VC_CALL_DEVHOOK_Create ($filePath_t)))
+						$error_l:=<>ERR_HOOK_CreateFail_l
+					End if 
+					
+				: ($currentAssetAction_t=<>VC_ACTION_Delete_t)
+					  // Call back to Implementing host to see if it is ok to delete this file.
+					If (Not(VC_CALL_DEVHOOK_Delete ($filePath_t)))
+						$error_l:=<>ERR_HOOK_DeleteFail_l
+					End if 
+					
+			End case 
+			
+			
+			  // Perform the action.
+			If ($error_l=0)
+				
+				Case of 
+					: ($currentAssetAction_t=<>VC_ACTION_Delete_t)
+						  // It's possible the file has already been deleted.  This is ok.
+						  // With SVN, for example, 'svn delete' immediately removes the
+						  // file (as opposed to deleting it on commit).
+						If (Test path name($filePath_t)=Is a document)
+							DELETE DOCUMENT($filePath_t)
+						End if 
+					Else 
+						  // Create and update are handled the same.
+						
+						  // Get the content of the asset.
+						Case of 
+							: ($currentAssetType_t=<>VC_TYPE_Method_t)
+								$error_l:=VCM_METHOD_Get ($currentAssetPath_t;->$fileContent_t)
+							: ($currentAssetType_t=<>VC_TYPE_Form_t)
+								$error_l:=VCF_FORM_Get ($currentAssetPath_t;->$fileContent_t)
+						End case 
+						
+						  // Save the asset.
+						$error_l:=VC_EXPORT_Save ($filePath_t;$fileContent_t)
+						
+				End case 
+				
+			End if 
+			
+			
+			If ($error_l=0)
+				  // If the action was processed correctly, clear it.
+				$newAction_t:=""
+				UTIL_ERR_HandlerInstall 
+				Begin SQL
+					UPDATE VC_Assets
+					SET action = :$newAction_t
+					WHERE path = :$currentAssetPath_t
+					AND type = :$currentAssetType_t;
+				End SQL
+				$error_l:=UTIL_ERR_HandlerRemove 
+				
+				If ($error_l=0)
+					If ($currentAssetAction_t=<>VC_ACTION_Delete_t)
+						  // If the asset was deleted, mark it as such so it can be ignored.
+						
+						  // It's true this could probably be combined with the previous update
+						  // as a micro-optimization but I prefer the action and state to be
+						  // treated separately.
+						  // This should be rare enough to not pose a performance issue.
+						UTIL_ERR_HandlerInstall 
+						$newState_t:=<>VC_STATE_Deleted_t
+						Begin SQL
+							UPDATE VC_Assets
+							SET state = :$newState_t
+							WHERE path = :$currentAssetPath_t
+							AND type = :$currentAssetType_t;
+						End SQL
+						$error_l:=UTIL_ERR_HandlerRemove 
+					End if 
+				End if 
+				
+			End if 
+			
+			  // Only increment if there was no error (in case I want to refer back to where I failed).
+			If ($error_l=0)
+				$currentAsset_l:=$currentAsset_l+1
+			End if 
+			
+		End while 
+		
+	End if 
+	
+End if 
+
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

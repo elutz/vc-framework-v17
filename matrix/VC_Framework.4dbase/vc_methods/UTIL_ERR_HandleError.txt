@@ -1,0 +1,94 @@
+﻿  //%attributes = {"invisible":true,"folder":"Error Handling","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 03/16/09, 17:10:11
+  // ----------------------------------------------------
+  // Description:
+  //   Error handler.
+  //
+  // Parameters:
+  //   C_LONGINT($1) = The error code.
+  //   C_TEXT($2) = Name of the module calling the error handler (otpional).  Used for dialog title.
+  //   C_TEXT($3) = Calling method name (optional).
+  //   C_TEXT($4) = Additional info for the error message (otpional).
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($1;UTIL_ERR_errorCode_l)
+C_TEXT($2;$moduleName_t)
+C_TEXT($3;UTIL_ERR_methodName_t)
+C_TEXT($4;UTIL_ERR_customMessage_t)
+
+  // Form variables.
+C_TEXT(UTIL_ERR_errorMessage_t;UTIL_ERR_processName_t;UTIL_ERR_currentUser_t;UTIL_ERR_context_t;UTIL_ERR_DialogTitle_t)
+
+C_LONGINT($winRef_l;$dontCare_l)
+C_TEXT($dialogName_t)
+
+  // Error code (a number).
+UTIL_ERR_errorCode_l:=$1
+
+  // Calling Module.
+If (Count parameters>=2)
+	$moduleName_t:=$2
+Else 
+	$moduleName_t:="(not specified)"
+End if 
+
+  // Calling method name.
+If (Count parameters>=3)
+	UTIL_ERR_methodName_t:=$3
+Else 
+	UTIL_ERR_methodName_t:="(not specified)"
+End if 
+
+  // Additional error info.
+If (Count parameters>=4)
+	UTIL_ERR_customMessage_t:=$4
+Else 
+	UTIL_ERR_customMessage_t:="(not specified)"
+End if 
+
+UTIL_ERR_DialogTitle_t:=$moduleName_t+" Error"
+
+  // Current user.
+UTIL_ERR_currentUser_t:=Current user
+
+  // Execution context.
+Case of 
+	: (Application type=4D Remote mode)
+		UTIL_ERR_context_t:="4D Remote Mode"
+	: (Application type=4D Local mode)
+		UTIL_ERR_context_t:="4D Local Mode"
+	: (Application type=4D Server)
+		UTIL_ERR_context_t:="4D Server"
+	: (Application type=4D Volume desktop)
+		UTIL_ERR_context_t:="4D Volume Desktop"
+End case 
+
+UTIL_ERR_errorMessage_t:=UTIL_ERR_GetErrorMessage (UTIL_ERR_errorCode_l)
+
+PROCESS PROPERTIES(Current process;UTIL_ERR_processName_t;$dontCare_l;$dontCare_l)
+
+  // I set up two different forms, one with 4D error data for internal 4D errors and one without.
+If (UTIL_ERR_4DError_l=0)
+	  // There is no 4D error, only a component error.
+	$dialogName_t:="UTIL_ERR_Dialog"
+Else 
+	  // There is a 4D error.
+	$dialogName_t:="UTIL_ERR_Dialog4D"
+End if 
+
+$winRef_l:=Open form window($dialogName_t;Sheet form window;Horizontally centered;Vertically centered)
+SET WINDOW TITLE(<>VC_COMPONENTNAME_T)
+DIALOG($dialogName_t)
+CLOSE WINDOW($winRef_l)
+
+  // Clear values when done.
+UTIL_ERR_errorCode_l:=0
+UTIL_ERR_methodName_t:=""
+UTIL_ERR_customMessage_t:=""
+UTIL_ERR_errorMessage_t:=""
+UTIL_ERR_processName_t:=""
+UTIL_ERR_currentUser_t:=""
+UTIL_ERR_context_t:=""
+UTIL_ERR_DialogTitle_t:=""
+ARRAY TEXT(UTIL_ERR_CallChain_at;0)

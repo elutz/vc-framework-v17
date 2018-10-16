@@ -1,0 +1,22 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/28/14, 14:56:45
+  // ----------------------------------------------------
+  // Description:
+  //   Check if method export is enabled or not.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($0;$exportMethods_f)
+
+C_LONGINT($error_l)
+C_TEXT($exportMethods_t)
+
+$error_l:=VC_EXT_PrefGet (<>VC_LABEL_ExportMethods_t;->$exportMethods_t)
+
+If ($error_l=0)
+	$exportMethods_f:=($exportMethods_t="True")
+Else 
+	$exportMethods_f:=True
+End if 
+
+$0:=$exportMethods_f

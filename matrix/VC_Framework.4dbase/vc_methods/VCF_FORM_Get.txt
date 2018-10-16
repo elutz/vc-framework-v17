@@ -1,0 +1,69 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/16/14, 10:38:16
+  // ----------------------------------------------------
+  // Description:
+  //   Given a form path, get the form content.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$formPath_t)
+C_POINTER($2;$fileContent_t_p)
+
+C_LONGINT($0;$error_l)
+
+C_OBJECT($formJSONObject_o;$parameterList_o)
+C_TEXT($formJSONContent_t;$metaData_t)
+
+$formPath_t:=$1
+$fileContent_t_p:=$2
+
+$error_l:=VC_EXT_Open 
+
+  // Need to get the form name and table name.
+If ($error_l=0)
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		SELECT metadata
+		FROM VC_Assets
+		WHERE path = :$formPath_t
+		AND type = :[<>VC_TYPE_Form_t]
+		INTO :$metaData_t;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+	$error_l:=VC_EXT_Close ($error_l)
+End if 
+
+
+  // Make sure we got the data.
+If ($error_l=0)
+	If ($metaData_t="")
+		$error_l:=<>ERR_FORM_NoMetadata_l
+	End if 
+End if 
+
+
+  // Form name and table name are required to convert the form to JSON.
+If ($error_l=0)
+	$parameterList_o:=JSON Parse($metaData_t)
+	
+	  // You can't pass an undeinfed C_OBJECT. It needs at least one property to be created.
+	  // I decided to include the path.
+	OB SET($formJSONObject_o;<>VCF_KEY_metaFormPath_t;$formPath_t)
+	
+	OB SET($parameterList_o;<>VCF_KEY_ParamForm_t;$formJSONObject_o)
+	
+	$error_l:=VCF_FORM_ToJSON ($parameterList_o)
+End if 
+
+  // Convert JSON to text.
+If ($error_l=0)
+	$formJSONContent_t:=JSON Stringify($formJSONObject_o;*)
+	$fileContent_t_p->:=$formJSONContent_t
+End if 
+
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

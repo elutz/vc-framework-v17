@@ -1,0 +1,46 @@
+﻿  //%attributes = {"invisible":true,"folder":"Generic Methods","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 10/11/12, 11:14:50
+  // ----------------------------------------------------
+  // Description:
+  //   Get the name of the database.
+  //
+  //   This is either the package name or structure file
+  //   name (without extension).
+  //
+  //   Assumes you want the name of the calling database;
+  //   will return the component name if it's a component.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($0;$databaseName_t)
+
+C_TEXT($packagePattern_t;$structureFile_t;$structurePattern_t;$structureFile_lower_t)
+C_LONGINT($start_l;$pos_l;$length_l)
+
+If (UTIL_IsComponent )
+	$packagePattern_t:="(?<=components.)\\w*(?=\\.4dbase)"
+	$structurePattern_t:="(?<=components.)\\w*(?=\\.4db)"
+Else 
+	$packagePattern_t:="\\w*(?=\\.4dbase)"
+	$structurePattern_t:="\\w*(?=\\.4db)"
+End if 
+
+$structureFile_t:=Structure file
+$structureFile_lower_t:=Lowercase($structureFile_t)
+
+$start_l:=1
+
+  // Check for a package name.
+If (Match regex($packagePattern_t;$structureFile_lower_t;$start_l;$pos_l;$length_l))
+	$databaseName_t:=Substring($structureFile_t;$pos_l;$length_l)
+Else 
+	  // No package, use structure name.
+	If (Match regex($structurePattern_t;$structureFile_lower_t;$start_l;$pos_l;$length_l))
+		$databaseName_t:=Substring($structureFile_t;$pos_l;$length_l)
+	Else 
+		  // This should never happen.
+		$databaseName_t:=Current method name+" this should never happen"
+	End if 
+End if 
+
+$0:=$databaseName_t

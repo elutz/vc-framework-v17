@@ -1,0 +1,25 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/25/14, 15:36:59
+  // ----------------------------------------------------
+  // Description:
+  //   Detect if On Exit or On Server Shutdown are running.
+  //
+  //   This only works if there IS an database quit method.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($0;$OnExitIsRunning_f)
+
+C_LONGINT($currentProc_l;$numProcs_l;$dontcare_l)
+C_TEXT($procName_t)
+
+$numProcs_l:=Count tasks
+
+For ($currentProc_l;1;$numProcs_l)
+	PROCESS PROPERTIES($currentProc_l;$procName_t;$dontcare_l;$dontcare_l)
+	If ($procName_t="$xx")
+		$OnExitIsRunning_f:=True
+	End if 
+End for 
+
+$0:=$OnExitIsRunning_f

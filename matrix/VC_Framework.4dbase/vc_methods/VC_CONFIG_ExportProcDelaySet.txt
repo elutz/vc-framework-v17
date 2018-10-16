@@ -1,0 +1,30 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 01/14/14, 11:28:23
+  // ----------------------------------------------------
+  // Description:
+  //   Set the duration for delay process used by the
+  //   process that handles new and updated methods.
+  //  
+  //   The default is 1 second, which is fine for
+  //   development but for deployed systems where the
+  //   code rarely changes it can be convenient to make
+  //   the delay longer.
+  //
+  //   The value should be in ticks.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($1;$exportDelay_l)
+
+C_LONGINT($error_l)
+
+$exportDelay_l:=$1
+
+$error_l:=VC_EXT_PrefSet (<>VC_LABEL_ExportProcDelay_t;String($exportDelay_l))
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+Else 
+	  // Make sure to update IP var.
+	<>VC_ExportProcDelay_l:=$exportDelay_l
+End if 

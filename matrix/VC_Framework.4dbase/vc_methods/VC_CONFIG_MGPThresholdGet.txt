@@ -1,0 +1,25 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 01/15/14, 15:49:35
+  // ----------------------------------------------------
+  // Description:
+  //   This value is used to test the performance of
+  //   METHOD GET PATHs.
+  //
+  //   Value is considered in milliseconds.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$threshold_l)
+
+C_LONGINT($error_l)
+C_TEXT($threshold_t)
+
+$error_l:=VC_EXT_PrefGet (<>VC_LABEL_DeleteMGPThreshold_t;->$threshold_t)
+
+If ($error_l=0)
+	$threshold_l:=Num($threshold_t)
+Else 
+	$threshold_l:=100
+End if 
+
+$0:=$threshold_l

@@ -1,0 +1,38 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/25/14, 13:34:18
+  // ----------------------------------------------------
+  // Description:
+  //   Replace text value in field with new value.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$table_t)
+C_TEXT($2;$field_t)
+C_TEXT($3;$oldValue_t)
+C_TEXT($4;$newValue_t)
+
+C_LONGINT($0;$error_l)
+
+C_TEXT($statement_t)
+
+$table_t:=$1
+$field_t:=$2
+$oldValue_t:=$3
+$newValue_t:=$4
+
+$statement_t:=""
+$statement_t:=$statement_t+"UPDATE "+$table_t
+$statement_t:=$statement_t+" SET "+$field_t+" = '"+$newValue_t+"'"
+$statement_t:=$statement_t+" WHERE "+$field_t+" = '"+$oldValue_t+"';"
+
+UTIL_ERR_HandlerInstall 
+Begin SQL
+	EXECUTE IMMEDIATE :$statement_t;
+End SQL
+$error_l:=UTIL_ERR_HandlerRemove 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

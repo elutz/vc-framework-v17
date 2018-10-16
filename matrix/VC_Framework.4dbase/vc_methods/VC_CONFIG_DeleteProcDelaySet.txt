@@ -1,0 +1,33 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 01/14/14, 11:28:23
+  // ----------------------------------------------------
+  // Description:
+  //   Set the duration for delay process used by
+  //   deletion detection process.
+  //  
+  //   The default is 5 seconds, which is fine for
+  //   development but for deployed systems where the
+  //   code rarely changes it can be convenient to make
+  //   the delay longer.
+  //
+  //   Also the delete code can be slow in large systems
+  //   so running it less often can be less disruptive.
+  //
+  //   The value should be in ticks.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($1;$deleteDelay_l)
+
+C_LONGINT($error_l)
+
+$deleteDelay_l:=$1
+
+$error_l:=VC_EXT_PrefSet (<>VC_LABEL_DeleteProcDelay_t;String($deleteDelay_l))
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+Else 
+	  // Make sure to update IP var.
+	<>VC_DeleteProcDelay_l:=$deleteDelay_l
+End if 

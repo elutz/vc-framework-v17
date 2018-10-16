@@ -1,0 +1,35 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Devhook","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 10/12/12, 11:48:55
+  // ----------------------------------------------------
+  // Description:
+  //   Call developer hook update event.
+  //
+  //   The target method should return true if it is ok
+  //   to save the file, otherwise false.
+  //
+  //   If VC_Framework is being used alone, the method is
+  //   always saved.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$filePath_t)
+
+C_BOOLEAN($0;$actionIsOK_f)
+
+C_LONGINT($error_l)
+
+$filePath_t:=$1
+
+UTIL_ERR_HandlerInstall ("VC_CALL_DEVHOOK_ErrorHandler")
+EXECUTE METHOD("VC_DEVHOOK_Update";$actionIsOK_f;$filePath_t)
+$error_l:=UTIL_ERR_HandlerRemove 
+
+If ($error_l=-10508)
+	  // Implementing host is not installed.
+	  // Use default export behavior.
+	$actionIsOK_f:=True
+Else 
+	  // The Implementing host should handle all other errors.
+End if 
+
+$0:=$actionIsOK_f

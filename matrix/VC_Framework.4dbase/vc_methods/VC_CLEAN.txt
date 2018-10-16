@@ -1,0 +1,48 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/11/14, 10:44:17
+  // ----------------------------------------------------
+  // Description:
+  //   Clean up anything from previous installations.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+C_BOOLEAN(VC_ProgInstalled_f)
+
+  // Set up progress bar component.
+VC_ProgInstalled_f:=UTIL_ProgStartup 
+
+  // Clean up the old table used for tracking methods.
+$error_l:=VC_CLEAN_VCMethods 
+
+  // Clean up the old folder used for storing methods.
+If ($error_l=0)
+	$error_l:=VC_CLEAN_VCSource 
+End if 
+
+  // Clean up the old table used for tracking errors.
+If ($error_l=0)
+	$error_l:=VC_CLEAN_VCBadPathLog 
+End if 
+
+  // Clean up any un-used or renamed preferences.
+If ($error_l=0)
+	$error_l:=VC_CLEAN_Prefs 
+End if 
+
+  // Clean up an old constant values.
+If ($error_l=0)
+	$error_l:=VC_CLEAN_Constants 
+End if 
+
+
+If (VC_ProgInstalled_f)
+	PROG_CloseAll 
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

@@ -1,0 +1,42 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/18/14, 12:08:18
+  // ----------------------------------------------------
+  // Description:
+  //   Create indexes used to improve performance.
+  //
+  //   REALLY SUCKS that I can't specify the type.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+  // Connect to external database.
+$error_l:=VC_EXT_Open 
+
+
+  // VC_Assets_type_index
+If ($error_l=0)
+	  // TODO: this should be a cluster b-tree but I don't
+	  // know of a way to do that via SQL. Can't use 4D
+	  // commands because it's an external database.
+	If (Not(VC_EXT_IndexExists ("VC_Assets";"type")))
+		UTIL_ERR_HandlerInstall 
+		Begin SQL
+			CREATE INDEX VC_Assets_type_index ON VC_Assets (type);
+		End SQL
+		$error_l:=UTIL_ERR_HandlerRemove 
+	End if 
+End if 
+
+  // TODO: I should have a composite index for VC_Assets.path and
+  // VC_Assets.type because it will be used for every search.
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

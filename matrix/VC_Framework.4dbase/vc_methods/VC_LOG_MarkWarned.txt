@@ -1,0 +1,41 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Log","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/20/12, 16:50:39
+  // ----------------------------------------------------
+  // Description:
+  //   The user is only warned about log entries once.
+  //
+  //   This command sets a flag to indicate the user has
+  //   already been warned.
+  // 
+  //   You don't need to call this per-entry because the
+  //   log file is generated in a batch.
+  //
+  //   There is some risk of a new entry being created
+  //   while the log file is being created but it will be
+  //   in the log file anyway.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+  // Open external database.
+$error_l:=VC_EXT_Open 
+
+If ($error_l=0)
+	  // Set the flag for all log entries.
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		UPDATE VC_PathErrorLog
+		SET userWarned = TRUE;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

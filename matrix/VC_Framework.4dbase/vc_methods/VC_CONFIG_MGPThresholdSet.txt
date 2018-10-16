@@ -1,0 +1,28 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 01/14/14, 11:28:23
+  // ----------------------------------------------------
+  // Description:
+  //   METHOD GET PATHS can cause a user perceivible hang
+  //   in Design Mode.
+  //
+  //   This value is used to determine if the hang is of
+  //   acceptable duration or not.
+  //
+  //   The value should be in milliseconds.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($1;$threshold_l)
+
+C_LONGINT($error_l)
+
+$threshold_l:=$1
+
+$error_l:=VC_EXT_PrefSet (<>VC_LABEL_DeleteMGPThreshold_t;String($threshold_l))
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+Else 
+	  // Make sure to update IP var.
+	<>VCM_MGPThreshold_l:=$threshold_l
+End if 

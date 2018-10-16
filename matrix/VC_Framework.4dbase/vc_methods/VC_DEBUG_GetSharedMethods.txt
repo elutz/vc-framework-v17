@@ -1,0 +1,19 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/28/14, 16:58:02
+  // ----------------------------------------------------
+  // Description:
+  //   Get all shared methods; helps me update the docs.
+  // --[HEADEREND]---------------------------------------
+ARRAY TEXT($sharedMethods_at;0)
+
+C_TEXT($sharedMethods_t)
+
+UTIL_METHOD_FindByAttribute (Attribute shared;->$sharedMethods_at)
+
+SORT ARRAY($sharedMethods_at)
+
+UTIL_ARRAY_TableAddColumn (->$sharedMethods_t;->$sharedMethods_at)
+
+SET TEXT TO PASTEBOARD($sharedMethods_t)

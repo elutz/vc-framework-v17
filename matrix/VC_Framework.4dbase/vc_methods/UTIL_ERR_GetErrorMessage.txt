@@ -1,0 +1,41 @@
+﻿  //%attributes = {"invisible":true,"folder":"Error Handling","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 03/16/09, 17:07:07
+  // ----------------------------------------------------
+  // Description:
+  //   Error message retreival for error handling module.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($1;$errorMessageID_l)
+
+C_TEXT($0;$errorMessage_t_xliff)
+
+C_LONGINT($xliffGroup_l)
+
+  // IMPROTANT NOTE:
+  // Internal error numbers are negative numbers.
+  // Error messages are localized via XLIFF.  XLIFF does
+  // not support negative ID's, so I simply make the
+  // error number positiove to get the XLIFF ID.
+$errorMessageID_l:=Abs($1)
+
+  // In addition, the XLIFF group is the first ID in the
+  // error group.  For example for errors ranging from
+  // -18000-18019, the XLIFF group is 18000.
+  // Round($errorMessageID_l;-3) would work until I have more than
+  // 50 error codes so this is probably more future proof.
+$xliffGroup_l:=Round(($errorMessageID_l/1000);0)*1000
+
+$errorMessage_t_xliff:=Get indexed string($xliffGroup_l;$errorMessageID_l)
+
+If ($errorMessage_t_xliff="")
+	  // Check to see if maybe there was a 4D error.
+	If (UTIL_ERR_4DError_l#0)
+		$errorMessage_t_xliff:=UTIL_ERR_4DStackErrors_at{1}
+	Else 
+		  // No error message was found, return something generic.
+		$errorMessage_t_xliff:=Get indexed string(18000;<>ERR_NULL_l)
+	End if 
+End if 
+
+$0:=$errorMessage_t_xliff

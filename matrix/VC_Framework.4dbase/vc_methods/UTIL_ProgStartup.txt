@@ -1,0 +1,20 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): jfletcher
+  // Date and time: 12/19/13, 15:10:19
+  // ----------------------------------------------------
+  // Description:
+  //   Set up the progress bar component if it's installed.
+  //
+  //   Note that this should be called per-process.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($0;$progInstalled_f)
+
+If (UTIL_IsComponentInstalled ("prog"))
+	$progInstalled_f:=True
+	EXECUTE METHOD("PROG_Startup")
+Else 
+	$progInstalled_f:=False
+End if 
+
+$0:=$progInstalled_f

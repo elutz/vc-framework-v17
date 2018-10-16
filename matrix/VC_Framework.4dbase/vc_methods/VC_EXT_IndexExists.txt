@@ -1,0 +1,44 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/18/14, 17:57:37
+  // ----------------------------------------------------
+  // Description:
+  //   Check to see if index exists in VC_Data database.
+  //
+  //   TODO: this should support composite indexes.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$tableName_t)
+C_TEXT($2;$fieldName_t)
+
+C_BOOLEAN($0;$indexExists_f)
+
+C_LONGINT($found_l;$error_l)
+
+$tableName_t:=$1
+$fieldName_t:=$2
+
+$error_l:=VC_EXT_Open 
+
+If ($error_l=0)
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		SELECT COUNT( INDEX_ID )
+		FROM _USER_IND_COLUMNS
+		WHERE TABLE_NAME LIKE :$tableName_t
+		AND COLUMN_NAME LIKE :$fieldName_t
+		INTO :$found_l;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+If ($error_l=0)
+	If ($found_l#0)
+		$indexExists_f:=True
+	End if 
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+$0:=$indexExists_f

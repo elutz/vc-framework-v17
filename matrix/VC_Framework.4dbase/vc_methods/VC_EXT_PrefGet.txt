@@ -1,0 +1,68 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework External Database","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/04/12, 14:15:36
+  // ----------------------------------------------------
+  // Description:
+  //   Get the value of preference located in the
+  //   external database.
+  //
+  //   Note: always returns text, caller should cast
+  //   as needed.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$prefLabel_t)
+C_POINTER($2;$prefValue_p_t)  // Always returns text, caller should convert as needed.
+
+C_LONGINT($0;$error_l)
+
+C_TEXT($prefExists_t;$prefValue_t)
+
+$prefLabel_t:=$1
+$prefValue_p_t:=$2
+
+  // Open external database.
+$error_l:=VC_EXT_Open 
+
+If ($error_l=0)
+	  // To test if the preference exists, I check for a UUID.
+	  // 4D will return "" if this preference if it doesn't exist.
+	
+	  // Always clear values for variables passed to SQL calls;
+	  // if no records are found, 4D doesn't modify the variables
+	  // (meaning previous values remain).
+	$prefExists_t:=""
+	$prefValue_t:=""
+	
+	  // Get the preference value.
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		SELECT ID, prefValue
+		FROM VC_Prefs
+		WHERE prefName = :$prefLabel_t
+		INTO :$prefExists_t, :$prefValue_t;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+
+  // Make sure the preference exists of course.
+If ($error_l=0)
+	If ($prefExists_t#"")
+		  // Return the value.
+		$prefValue_p_t->:=$prefValue_t
+	Else 
+		  // The preference doesn't exist.
+		$error_l:=<>ERR_PREF_NotFound_l
+		$prefValue_p_t->:=""
+	End if 
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

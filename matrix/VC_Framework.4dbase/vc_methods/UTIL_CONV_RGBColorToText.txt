@@ -1,0 +1,34 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // Date and time: 08/15/13
+  //   Convert integer RGB color value to 4 byte hex string.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($1;$RGBColor_l)
+
+C_TEXT($0;$RGBColor_t)
+
+C_TEXT($hexColorFormat_t;$padding_t)
+C_LONGINT($length_l;$difference_l)
+
+$RGBColor_l:=$1
+
+$hexColorFormat_t:="&x"
+
+  // This format results in inconsistent widths. Sometimes
+  // there are leading zeros, other times not.
+$RGBColor_t:=String($RGBColor_l;$hexColorFormat_t)
+
+  // So check the length of the string and add leading
+  // zeros as needed.
+  // Of course I could do the conversion to hex myself
+  // and format it but I prefer to let 4D do some of the
+  // work.
+$length_l:=Length($RGBColor_t)
+$difference_l:=10-$length_l
+
+If ($difference_l>0)
+	$padding_t:="0"*$difference_l
+	$RGBColor_t:=Insert string($RGBColor_t;$padding_t;3)
+End if 
+
+$0:=$RGBColor_t

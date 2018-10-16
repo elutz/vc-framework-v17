@@ -1,0 +1,58 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework External Database","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/04/12, 14:11:08
+  // ----------------------------------------------------
+  // Description:
+  //   Open connection to external database, if it's not
+  //   already open.
+  //
+  //   If it is open, only a counter is increased, since
+  //   the connection is shared per-process.
+  //
+  //   Note that if other processes have the connection
+  //   open 4D already handles that case.
+  //
+  //   Note that the data file lives on the server in
+  //   client-server.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+  // This is used so the database is only opened once per
+  // process.  In this way you can call VC_EXT_Open any
+  // time the external database is needed.
+C_LONGINT(VC_EXT_NumConnections_l)
+
+C_TEXT($statement_t)
+
+  // Only open if there are no current connections.
+If (VC_EXT_NumConnections_l=0)
+	
+	$statement_t:="USE REMOTE DATABASE DATAFILE '"+<>VC_Database_t+"'"
+	  // AUTO_CLOSE is useful because you can open the database to
+	  // check the data in another copy of 4D while the host is running.
+	  // But it's slower, so comment this out for better performance though.
+	  // $statement_t:=$statement_t+" AUTO_CLOSE"
+	$statement_t:=$statement_t+";"
+	
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		EXECUTE IMMEDIATE :$statement_t;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+	
+	If ($error_l=0)
+		VC_EXT_NumConnections_l:=VC_EXT_NumConnections_l+1
+	End if 
+	
+Else 
+	  // The connection is already open, just increment the counter.
+	VC_EXT_NumConnections_l:=VC_EXT_NumConnections_l+1
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

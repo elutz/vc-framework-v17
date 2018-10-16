@@ -1,0 +1,95 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework External Database","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/04/12, 15:25:12
+  // ----------------------------------------------------
+  // Description:
+  //   Set the value of preference located in the
+  //   external database.
+  //
+  //   You can optionally prevent overwriting of an existing
+  //   value.
+  //
+  //   If the setting doesn't exist, it will be created.
+  //
+  //   Note: only accepts text, caller should vast
+  //   as needed.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$prefLabel_t)
+C_TEXT($2;$prefValue_t)
+C_BOOLEAN($3;$overwrite_f)  // Optional, default true
+
+C_LONGINT($0;$error_l)
+
+C_LONGINT($prefExists_l)
+
+$prefLabel_t:=$1
+$prefValue_t:=$2
+
+If (Count parameters>2)
+	$overwrite_f:=$3
+Else 
+	$overwrite_f:=True  // Default to overwrite.
+End if 
+
+  // Open external database.
+$error_l:=VC_EXT_Open 
+
+If ($error_l=0)
+	
+	  // Always clear values for variables passed to SQL calls;
+	  // if no records are found, 4D doesn't modify the variables
+	  // (meaning previous values remain).
+	$prefExists_l:=0
+	
+	  // Test to see if the preference exists...
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		SELECT COUNT( ID )
+		FROM VC_Prefs
+		WHERE prefName = :$prefLabel_t
+		INTO :$prefExists_l;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+
+If ($error_l=0)
+	  // I didn't add further 4D error handling in
+	  // the following code (i.e. per-SQL statement)
+	  // because if the above query works chances are
+	  // things are ok and the error handling just
+	  // makes the code harder to read.
+	
+	If ($prefExists_l=0)
+		
+		  // If it doesn't exist, create it.
+		Begin SQL
+			INSERT INTO VC_Prefs 
+			( prefName, prefValue )
+			VALUES
+			( :$prefLabel_t, :$prefValue_t );
+		End SQL
+		
+	Else 
+		
+		  // Preference exists, see if the user wants the value overwritten.
+		If ($overwrite_f)
+			Begin SQL
+				UPDATE VC_Prefs
+				SET prefValue = :$prefValue_t
+				WHERE prefName = :$prefLabel_t;
+			End SQL
+		End if 
+	End if 
+	
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

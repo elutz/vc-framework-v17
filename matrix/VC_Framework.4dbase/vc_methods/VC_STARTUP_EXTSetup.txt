@@ -1,0 +1,120 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/18/14, 11:51:43
+  // ----------------------------------------------------
+  // Description:
+  //   Set up the external database.
+  //
+  //   Note that the external database is stored with the
+  //   host so that component upgrades are easy.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+C_TEXT($externalDataFolderName_t;$externalDataFolderPath_t;$externalDatabaseName_t)
+C_TEXT($statement_t)
+
+$externalDataFolderName_t:="vc_data"
+$externalDataFolderPath_t:=Get 4D folder(Database folder;*)+$externalDataFolderName_t
+$externalDatabaseName_t:="VC_Data"
+
+  // Path to external database to store metadata.
+C_TEXT(<>VC_Database_t)
+<>VC_Database_t:=$externalDataFolderPath_t+Folder separator+$externalDatabaseName_t
+
+If (Test path name($externalDataFolderPath_t)#Is a folder)
+	CREATE FOLDER($externalDataFolderPath_t)
+End if 
+
+
+If (Test path name(<>VC_Database_t+".4db")#Is a document)
+	
+	  // Create the database.
+	$statement_t:="CREATE DATABASE IF NOT EXISTS DATAFILE '"+<>VC_Database_t+"';"
+	
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		EXECUTE IMMEDIATE :$statement_t;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+	
+End if 
+
+
+  // Optimization since the following code will open and close the database a lot.
+If ($error_l=0)
+	$error_l:=VC_EXT_Open 
+End if 
+
+
+  // ===================================================================================
+  // Create tables.
+
+  // Create preferences table.
+If ($error_l=0)
+	$statement_t:=""
+	$statement_t:=$statement_t+"VC_Prefs"
+	$statement_t:=$statement_t+"("
+	$statement_t:=$statement_t+"ID UUID NOT NULL UNIQUE AUTO_GENERATE,"
+	$statement_t:=$statement_t+"prefName VARCHAR NOT NULL UNIQUE,"
+	$statement_t:=$statement_t+"prefValue VARCHAR NOT NULL"
+	$statement_t:=$statement_t+")"
+	
+	$error_l:=VC_EXT_CreateTable ($statement_t)
+End if 
+
+  // Create table for tracking assets.
+If ($error_l=0)
+	$statement_t:=""
+	$statement_t:=$statement_t+"VC_Assets"
+	$statement_t:=$statement_t+"("
+	$statement_t:=$statement_t+"ID UUID NOT NULL UNIQUE AUTO_GENERATE,"
+	$statement_t:=$statement_t+"path VARCHAR NOT NULL,"  // THIS IS NO LONGER UNIQUE: you can have a method and form with the same name.
+	$statement_t:=$statement_t+"type VARCHAR NOT NULL,"  // The type is required to determine uniqueness.
+	$statement_t:=$statement_t+"metadata VARCHAR,"
+	$statement_t:=$statement_t+"action VARCHAR,"
+	$statement_t:=$statement_t+"state VARCHAR NOT NULL"
+	$statement_t:=$statement_t+")"
+	
+	$error_l:=VC_EXT_CreateTable ($statement_t)
+End if 
+
+  // Create logging table for logging invalid paths.
+If ($error_l=0)
+	$statement_t:=""
+	$statement_t:=$statement_t+"VC_PathErrorLog"
+	$statement_t:=$statement_t+"("
+	$statement_t:=$statement_t+"ID UUID NOT NULL UNIQUE AUTO_GENERATE,"
+	$statement_t:=$statement_t+"path VARCHAR NOT NULL UNIQUE,"
+	$statement_t:=$statement_t+"type VARCHAR NOT NULL,"
+	$statement_t:=$statement_t+"metadata VARCHAR,"
+	$statement_t:=$statement_t+"userWarned BOOLEAN NOT NULL"
+	$statement_t:=$statement_t+")"
+	
+	$error_l:=VC_EXT_CreateTable ($statement_t)
+End if 
+
+
+  // ===================================================================================
+  // Create indexes.
+
+  // Indexes for unique fields are not optional, so just auto-create those.
+If ($error_l=0)
+	$error_l:=VC_EXT_CreateIndexesForUnique 
+End if 
+
+  // Create Indexes to improve performance.
+If ($error_l=0)
+	$error_l:=VC_STARTUP_EXTIndex 
+End if 
+
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

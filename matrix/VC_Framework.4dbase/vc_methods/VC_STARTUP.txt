@@ -1,0 +1,41 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"executedOnServer":true,"folder":"VC_Framework Startup","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 05/16/14, 15:29:40
+  // ----------------------------------------------------
+  // Description:
+  //   Launch VC_Framework startup code.
+  //
+  //   This code can be launched via the macro events,
+  //   no setup code is required in the Host database.
+  //
+  //   Run as a separate process so it doesn't hang up On
+  //   Startup (also because of ACI0087902) nor Design
+  //   Mode (when launched from a Macro).
+  //
+  //   Note: executes on server.
+  // --[HEADEREND]---------------------------------------
+C_OBJECT($1;$startupParameters_o)
+
+C_LONGINT($stack_l;$PID_l)
+C_TEXT($methodName_t;$processName_t)
+C_BOOLEAN($paramsIncluded_f)
+
+$paramsIncluded_f:=(Count parameters>=1)
+
+If ($paramsIncluded_f)
+	$startupParameters_o:=$1
+End if 
+
+$stack_l:=1024*1024
+$methodName_t:="VC_STARTUP_Process"
+$processName_t:=$methodName_t
+
+  // Only create a new process if it's safe to start.
+If (VC_STARTUP_OkToStart )
+	If ($paramsIncluded_f)
+		$PID_l:=New process($methodName_t;$stack_l;$processName_t;$startupParameters_o;*)
+	Else 
+		$PID_l:=New process($methodName_t;$stack_l;$processName_t;*)
+	End if 
+End if 

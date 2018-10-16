@@ -1,0 +1,23 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 01/15/14, 15:38:58
+  // ----------------------------------------------------
+  // Description:
+  //   This is the value used for DELAY PROCESS by
+  //   the process that handles new and updated methods.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$exportDelay_l)
+
+C_LONGINT($error_l)
+C_TEXT($exportDelay_t)
+
+$error_l:=VC_EXT_PrefGet (<>VC_LABEL_ExportProcDelay_t;->$exportDelay_t)
+
+If ($error_l=0)
+	$exportDelay_l:=Num($exportDelay_t)
+Else 
+	$exportDelay_l:=60
+End if 
+
+$0:=$exportDelay_l

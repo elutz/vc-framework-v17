@@ -1,0 +1,25 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 08/01/14, 14:33:00
+  // ----------------------------------------------------
+  // Description:
+  //   Detect if the database is quitting.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($0;$isDatabaseQuitting_f)
+
+If (Application type=4D Server)
+	
+	If (VCM_UTIL_MethodExists ("[databaseMethod]/onServerShutdown"))
+		$isDatabaseQuitting_f:=UTIL_IsOnExitRunning 
+	End if 
+	
+Else 
+	
+	If (VCM_UTIL_MethodExists ("[databaseMethod]/onExit"))
+		$isDatabaseQuitting_f:=UTIL_IsOnExitRunning 
+	End if 
+	
+End if 
+
+$0:=$isDatabaseQuitting_f

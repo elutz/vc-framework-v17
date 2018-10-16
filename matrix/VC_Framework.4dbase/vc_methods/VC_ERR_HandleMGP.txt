@@ -1,0 +1,34 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 05/14/14, 19:33:35
+  // ----------------------------------------------------
+  // Description:
+  //   Now that MGP can generate 4D errors I really need
+  //   Some proper error handling. This is the first step.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($i;$limit_l)
+C_TEXT($pattern_t)
+
+  // Set up default error handling vars.
+UTIL_ERR_GenericHandler 
+
+Case of 
+	: (UTIL_ERR_4DError_l=-9802)
+		
+		$pattern_t:=".+unnamed.+"
+		$limit_l:=Size of array(UTIL_ERR_4DStackErrors_at)
+		
+		For ($i;1;$limit_l)
+			If (Match regex($pattern_t;UTIL_ERR_4DStackErrors_at{$i}))
+				<>VCM_ERR_UnnamedErrorDetected_f:=True
+			End if 
+		End for 
+		
+	Else 
+		  // Ignore the error.  I don't know of any other cases
+		  // yet where I care about errors from MGP. I've been
+		  // ignoring ALL errors up until now so this can't
+		  // really be any worse.
+		UTIL_ERR_HandlerPrep 
+End case 

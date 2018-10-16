@@ -1,0 +1,78 @@
+﻿  //%attributes = {"invisible":true,"folder":"Error Handling","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/11/12, 15:25:32
+  // ----------------------------------------------------
+  // Description:
+  //   Copy contents of error dialog to clipboard.
+  // --[HEADEREND]---------------------------------------
+
+  // These variables track internal 4D error data.
+C_LONGINT(UTIL_ERR_4DError_l)
+C_TEXT(UTIL_ERR_4DErrorMethod_t)
+C_LONGINT(UTIL_ERR_4DErrorLine_l)
+
+  // These arrays track error stack data (commented out so as not to reset the size).
+  // ARRAY LONGINT(UTIL_ERR_4DStackCodes_al;0)
+  // ARRAY TEXT(UTIL_ERR_4DStackComp_at;0)
+  // ARRAY TEXT(UTIL_ERR_4DStackErrors_at;0)
+
+  // These variables track UTIL_ERR_ module data.
+C_LONGINT(UTIL_ERR_errorCode_l)
+C_TEXT(UTIL_ERR_methodName_t)
+C_TEXT(UTIL_ERR_customMessage_t)
+C_TEXT(UTIL_ERR_errorMessage_t)
+C_TEXT(UTIL_ERR_processName_t)
+C_TEXT(UTIL_ERR_currentUser_t)
+C_TEXT(UTIL_ERR_context_t)
+C_TEXT(UTIL_ERR_DialogTitle_t)
+
+C_TEXT($errorText_t;$endl_t;$tab_t;$errorStack_t;$callChain_t)
+
+$endl_t:=Char(Carriage return)
+$tab_t:=Char(Tab)
+
+  // UTIL_ERR_ module data.
+$errorText_t:=""
+$errorText_t:=$errorText_t+UTIL_ERR_DialogTitle_t+$endl_t
+$errorText_t:=$errorText_t+"Error Code"+$tab_t+String(UTIL_ERR_errorCode_l)+$endl_t
+$errorText_t:=$errorText_t+"Calling Method"+$tab_t+UTIL_ERR_methodName_t+$endl_t
+$errorText_t:=$errorText_t+"Process Name"+$tab_t+UTIL_ERR_processName_t+$endl_t
+$errorText_t:=$errorText_t+"User Name"+$tab_t+UTIL_ERR_currentUser_t+$endl_t
+$errorText_t:=$errorText_t+"Context"+$tab_t+UTIL_ERR_context_t+$endl_t
+$errorText_t:=$errorText_t+"Error Message"+$tab_t+UTIL_ERR_errorMessage_t+$endl_t
+$errorText_t:=$errorText_t+"Custom Message"+$tab_t+UTIL_ERR_customMessage_t+$endl_t
+
+If (Size of array(UTIL_ERR_CallChain_at)>0)
+	  // Append call chain data if any.
+	$errorText_t:=$errorText_t+$endl_t
+	$errorText_t:=$errorText_t+"Call Chain:"+$endl_t
+	UTIL_ARRAY_TableAddColumn (->$callChain_t;->UTIL_ERR_CallChain_at)
+	$errorText_t:=$errorText_t+$callChain_t
+End if 
+
+
+If (UTIL_ERR_4DError_l#0)
+	  // 4D error data.
+	$errorText_t:=$errorText_t+$endl_t
+	$errorText_t:=$errorText_t+"4D Error Code"+$tab_t+String(UTIL_ERR_4DError_l)+$endl_t
+	$errorText_t:=$errorText_t+"Error Method"+$tab_t+UTIL_ERR_4DErrorMethod_t+$endl_t
+	$errorText_t:=$errorText_t+"Error Line #"+$tab_t+String(UTIL_ERR_4DErrorLine_l)+$endl_t
+End if 
+
+
+If (Size of array(UTIL_ERR_4DStackCodes_al)>0)
+	  // Append stack info.
+	$errorText_t:=$errorText_t+$endl_t
+	$errorText_t:=$errorText_t+"Error Stack:"+$endl_t
+	$errorText_t:=$errorText_t+"Code"+$tab_t+"Comp"+$tab_t+"Message"+$endl_t
+	
+	UTIL_ARRAY_TableAddColumn (->$errorStack_t;->UTIL_ERR_4DStackCodes_al)
+	UTIL_ARRAY_TableAddColumn (->$errorStack_t;->UTIL_ERR_4DStackComp_at)
+	UTIL_ARRAY_TableAddColumn (->$errorStack_t;->UTIL_ERR_4DStackErrors_at)
+	
+	$errorText_t:=$errorText_t+$errorStack_t
+End if 
+
+
+SET TEXT TO PASTEBOARD($errorText_t)

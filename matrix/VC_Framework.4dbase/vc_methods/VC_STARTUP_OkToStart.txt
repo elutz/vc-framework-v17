@@ -1,0 +1,57 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Startup","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): jfletcher
+  // Date and time: 04/05/12, 16:17:12
+  // ----------------------------------------------------
+  // Description:
+  //   This method is used to determine if it is ok to
+  //   execute VC_STARTUP_Process.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($0;$okToStart_f)
+
+C_BOOLEAN(<>VC_Enabled_f;<>VC_ERROR_F;<>VC_StartupExecuting_f)
+
+$okToStart_f:=False
+
+  // This is to prevent multiple processes from running the startup code.
+If (Not(<>VC_StartupExecuting_f))
+	<>VC_StartupExecuting_f:=True
+	
+	  // <>VC_StartupExecuting_f is different than <>VC_Enabled_f.
+	  // The startup code might run, but fail to enable the component.
+	  // I may be able to later enable the component by fixing any errors.
+	
+	  // Check to see if component hasn't been enabled yet.
+	  // I only want the startup code to run once successfully.
+	If (<>VC_Enabled_f=False)
+		$okToStart_f:=True
+	End if 
+	
+	  // Never run startup code if an error has occurred.
+	If (<>VC_ERROR_F)
+		$okToStart_f:=False
+	End if 
+	
+	  // Never run startup code in compiled mode, Design Object Access
+	  // cannot be used in compiled mode.
+	If (Is compiled mode)
+		$okToStart_f:=False
+	End if 
+	
+	  // I often need to disable the component during development.
+	If (VC_DEBUG_Disabled )
+		$okToStart_f:=False
+	End if 
+	
+	  // If the startup code can't run, there's no reason to keep the flag set.
+	  // Otherwise it's cleared later at the end of a successful startup.
+	If (Not($okToStart_f))
+		<>VC_StartupExecuting_f:=False
+	End if 
+	
+Else 
+	  // Another process is already running the startup code.
+	$okToStart_f:=False
+End if 
+
+$0:=$okToStart_f

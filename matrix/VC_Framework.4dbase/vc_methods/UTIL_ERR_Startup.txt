@@ -1,0 +1,134 @@
+﻿  //%attributes = {"invisible":true,"folder":"Error Handling","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 06/16/11, 18:12:04
+  // ----------------------------------------------------
+  // Description:
+  //   Error module startup code.
+  //
+  //   IMPROTANT NOTE: error messages are localized via
+  //   XLIFF. The XLIFF group is the first ID in the
+  //   error group.  For example for errors ranging from
+  //   -18000-18019, the XLIFF group is 18000.
+  // --[HEADEREND]---------------------------------------
+
+  // Because I've added an array to track the call stack,
+  // this code should really only run once per process.
+C_BOOLEAN(UTIL_ERR_StartupExecuted)
+If (Not(UTIL_ERR_StartupExecuted))
+	UTIL_ERR_StartupExecuted:=True
+	  // This can be used to optionally track the call stack for an error.
+	ARRAY TEXT(UTIL_ERR_CallChain_at;0)
+End if 
+
+  // *****************
+  // Error blocks already in use:
+  //
+  //   (I recommend reserving blocks of 20 for each module just to have a safe buffer)
+  //
+  //   -18000-18019 - Global
+  //   -18100-18119 - PREF_
+  //   -18200-18219 - EXT_
+  //   -18300-18319 - VC_
+  //   -18400-18419 - HOOK_
+  //   -18500-18519 - CLEAN_
+  //   -18600-18619 - METH_
+  //   -18700-18719 - FORM_
+  //   -18800-18819 - WARN_
+  //   -20000-...   - IMPORT_
+  // *****************
+
+
+  // *****************
+  //   -18000-18019 - Global
+  // *****************
+C_LONGINT(<>ERR_Unknown_l)
+C_LONGINT(<>ERR_4D_l)
+C_LONGINT(<>ERR_NULL_l)
+
+<>ERR_Unknown_l:=-18001
+<>ERR_4D_l:=-18002
+<>ERR_NULL_l:=-18003  // This is never used in the code, it's for a generic error message.
+
+
+  // *****************
+  //   -18100-18119 - PREF_
+  // *****************
+C_LONGINT(<>ERR_PREF_NotFound_l)
+C_LONGINT(<>ERR_PREF_DeleteFailed_l)
+
+<>ERR_PREF_NotFound_l:=-18101
+<>ERR_PREF_DeleteFailed_l:=-18102
+
+
+  // *****************
+  //   -18200-18219 - EXT_
+  // *****************
+C_LONGINT(<>ERR_EXT_NotOpen_l)
+
+<>ERR_EXT_NotOpen_l:=-18201
+
+
+  // *****************
+  //   -18300-18319 - VC_
+  // *****************
+C_LONGINT(<>ERR_VC_NotEnabled_l)
+
+<>ERR_VC_NotEnabled_l:=-18301
+
+
+  // *****************
+  //   -18400-18419 - HOOK_
+  // *****************
+C_LONGINT(<>ERR_HOOK_UpdateFail_l)
+C_LONGINT(<>ERR_HOOK_CreateFail_l)
+C_LONGINT(<>ERR_HOOK_DeleteFail_l)
+
+<>ERR_HOOK_UpdateFail_l:=-18401
+<>ERR_HOOK_CreateFail_l:=-18402
+<>ERR_HOOK_DeleteFail_l:=-18403
+
+
+  // *****************
+  //   -18500-18519 - CLEAN_
+  // *****************
+C_LONGINT(<>ERR_CLEAN_MoveFailed_l)
+
+<>ERR_CLEAN_MoveFailed_l:=-18501
+
+
+  // *****************
+  //   -18600-18619 - METH_
+  // *****************
+C_LONGINT(<>ERR_METH_BadType_l)
+
+<>ERR_METH_BadType_l:=-18601
+
+
+  // *****************
+  //   -18700-18719 - FORM_
+  // *****************
+C_LONGINT(<>ERR_FORM_NoMetadata_l)
+
+<>ERR_FORM_NoMetadata_l:=-18701
+
+
+  // *****************
+  //   -18800-18819 - WARN_
+  // *****************
+C_LONGINT(<>WARN_ASSET_BadName_L)
+C_LONGINT(<>WARN_ASSET_BadPathsFound_l)
+
+<>WARN_ASSET_BadName_L:=-18801
+<>WARN_ASSET_BadPathsFound_l:=-18802
+
+  // *****************
+  //   -20000-... - IMPORT_
+  // *****************
+C_LONGINT(<>ERR_IMPORT_NothingToImport_l)
+C_LONGINT(<>ERR_IMPORT_EmptyMethod_l)
+C_LONGINT(<>ERR_IMPORT_WrongEncoding_l)
+
+<>ERR_IMPORT_NothingToImport_l:=-20001
+<>ERR_IMPORT_EmptyMethod_l:=-20002
+<>ERR_IMPORT_WrongEncoding_l:=-20003

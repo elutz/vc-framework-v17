@@ -1,0 +1,43 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 06/23/14, 17:04:47
+  // ----------------------------------------------------
+  // Description:
+  //   Get current version of the component, which is
+  //   stored in a text file.
+  //
+  //   However this needs to return something when doing
+  //   development too (where the txt file doesn't exist).
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$version_l)
+
+C_TEXT($version_t;$versionPattern_t)
+C_TEXT($pathToDocument_t;$documentText_t;$encoding_t)
+C_LONGINT($start_l;$pos_l;$length_l;$error_l)
+C_BLOB($document_b)
+
+If (UTIL_IsComponent )
+	
+	$encoding_t:="UTF-8"
+	$pathToDocument_t:="version.txt"
+	  // Would love to use Document to text but it's 3000x slower, see ACI0087848.
+	DOCUMENT TO BLOB($pathToDocument_t;$document_b)
+	$documentText_t:=Convert to text($document_b;$encoding_t)
+	
+	$versionPattern_t:="(?<=Component Version: )\\d+"
+	$start_l:=1
+	
+	If (Match regex($versionPattern_t;$documentText_t;$start_l;$pos_l;$length_l))
+		$version_t:=Substring($documentText_t;$pos_l;$length_l)
+	Else 
+		$version_t:="-1"
+	End if 
+	
+Else 
+	$error_l:=VC_EXT_PrefGet (<>VCM_LABEL_Stamp_t;->$version_t)
+End if 
+
+$version_l:=Num($version_t)
+
+$0:=$version_l

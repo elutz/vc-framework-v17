@@ -1,0 +1,27 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Method Export","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/20/12, 13:35:53
+  // ----------------------------------------------------
+  // Description:
+  //   Remove any method assets from the assets table.
+  //
+  //   WARNING: this may desynchronize VC_Framework with the
+  //   VC being used. VC_Framework will try to create all
+  //   methods after doing this, therefore calling the
+  //   "create" devhook.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+ARRAY TEXT($typesToDelete_at;1)
+
+$typesToDelete_at{1}:=<>VC_TYPE_Method_t
+
+$error_l:=VC_EXPORT_Clear (->$typesToDelete_at)
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

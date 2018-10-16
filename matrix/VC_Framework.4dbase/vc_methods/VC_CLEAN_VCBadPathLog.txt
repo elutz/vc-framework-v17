@@ -1,0 +1,37 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/16/14, 12:21:59
+  // ----------------------------------------------------
+  // Description:
+  //   Previous versions used a table called
+  //   "VC_BadPathLog".
+  //
+  //   Now that VC_Framework supports more than one type
+  //   of asset, I needed to change the strucutre of this
+  //   table. Rather than modify the existing table, I
+  //   just renamed it to "VC_PathErrorLog".
+  //
+  //   This code will NOT preserve previous data, it
+  //   will delete "VC_BadPathLog" if it still exists.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+$error_l:=VC_EXT_Open 
+
+  // Remove the VC_BadPathLog table.
+If ($error_l=0)
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		DROP TABLE IF EXISTS VC_BadPathLog;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

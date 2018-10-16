@@ -1,0 +1,41 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/18/14, 14:37:11
+  // ----------------------------------------------------
+  // Description:
+  //   Form analog of METHOD RESOLVE PATH.
+  //
+  //   Given the "path" to a form, return the form name
+  //   and table number.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$formPath_t)
+C_POINTER($2;$formName_t_p)
+C_POINTER($3;$tableNum_l_p)
+
+C_LONGINT($pos_l;$tableNum_l)
+C_TEXT($formName_t;$tableName_t)
+
+ARRAY TEXT($tableTitles_at;0)
+ARRAY LONGINT($tableNums_al;0)
+
+$formPath_t:=$1
+$formName_t_p:=$2
+$tableNum_l_p:=$3
+
+$pos_l:=Position("/";$formPath_t)
+
+If ($pos_l>0)
+	  // Table form.
+	$tableName_t:=Substring($formPath_t;1;$pos_l-1)
+	GET TABLE TITLES($tableTitles_at;$tableNums_al)
+	$tableNum_l:=$tableNums_al{(Find in array($tableTitles_at;$tableName_t))}
+Else 
+	  // Project form.
+	$tableNum_l:=0
+End if 
+
+$formName_t:=Substring($formPath_t;$pos_l+1)
+
+$formName_t_p->:=$formName_t
+$tableNum_l_p->:=$tableNum_l

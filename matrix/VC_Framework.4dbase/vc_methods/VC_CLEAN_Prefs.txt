@@ -1,0 +1,70 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/21/14, 15:15:54
+  // ----------------------------------------------------
+  // Description:
+  //   On occasion I change the key/name of a preference
+  //   (e.g. in hopes of making it clearer or to add
+  //   multi-module support).
+  //
+  //   I don't want to pollute the preferences table with
+  //   old data.
+  //
+  //   I also don't want to lose any changes the user
+  //   might have made when I do this.
+  //
+  //   This wrapper method moves the old values to new
+  //   values.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+  // Open external database.
+$error_l:=VC_EXT_Open 
+
+
+  // ===================================================================================
+  // VC_
+If ($error_l=0)
+	$error_l:=VC_CLEAN_Pref ("VC_DeleteIgnore";<>VC_LABEL_DeleteIgnoreSlow_t)
+End if 
+
+If ($error_l=0)
+	$error_l:=VC_CLEAN_Pref ("VC_DeleteDelay";<>VC_LABEL_DeleteProcDelay_t)
+End if 
+
+If ($error_l=0)
+	$error_l:=VC_CLEAN_Pref ("VC_ExportDelay";<>VC_LABEL_ExportProcDelay_t)
+End if 
+
+If ($error_l=0)
+	$error_l:=VC_CLEAN_Pref ("VC_MGPThreshold";<>VC_LABEL_DeleteMGPThreshold_t)
+End if 
+
+
+  // ===================================================================================
+  // VCM_
+If ($error_l=0)
+	$error_l:=VC_CLEAN_Pref ("Last Method Stamp";<>VCM_LABEL_Stamp_t)
+End if 
+If ($error_l=0)
+	$error_l:=VC_CLEAN_Pref ("Last Import Stamp";<>VCM_LABEL_StampImport_t)
+End if 
+
+  // ===================================================================================
+  // VCF_
+If ($error_l=0)
+	$error_l:=VC_CLEAN_Pref ("Last Form Stamp";<>VCF_LABEL_Stamp_t)
+End if 
+
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+
+$0:=$error_l

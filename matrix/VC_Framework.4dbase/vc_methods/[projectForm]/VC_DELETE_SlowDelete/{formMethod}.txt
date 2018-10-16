@@ -1,0 +1,41 @@
+﻿  //%attributes = {"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 05/12/14, 15:27:20
+  // ----------------------------------------------------
+  // Description:
+  //   Setup dialog to warn user that METHOD GET PATHS is
+  //   slow.
+  //
+  // --[HEADEREND]---------------------------------------
+C_TEXT(VC_DELETE_Average_t)  // Defined in VC_DELETE_PerfTest
+
+C_LONGINT(VC_DELETE_rbIgnoreOnce_l)
+C_BOOLEAN(VC_DELETE_IgnoreOnce_f)
+
+C_LONGINT(VC_DELETE_rbIgnoreAlways_l)
+C_BOOLEAN(VC_DELETE_IgnoreAlways_f)
+
+C_LONGINT(VC_DELETE_rbDeleteIfChange_l)
+C_BOOLEAN(VC_DELETE_DeleteIfChange_f)
+
+  // This feature isn't currently offered (see VCM_UTIL_DetectUnnamedError)
+C_LONGINT(VC_DELETE_rbDeleteOnExit_l)
+C_BOOLEAN(VC_DELETE_InstallDeleteOnExit_f)
+
+C_TEXT($message_t_xliff)
+C_LONGINT($formEvent_l)
+
+$formEvent_l:=Form event
+
+Case of 
+	: ($formEvent_l=On Load)
+		$message_t_xliff:=Get indexed string(1003;6)
+		PROCESS 4D TAGS($message_t_xliff;$message_t_xliff)
+		
+		VC_DELETE_Message_t:=$message_t_xliff
+		
+		VC_DELETE_rbIgnoreOnce_l:=1
+		VC_DELETE_IgnoreOnce_f:=True
+		
+End case 

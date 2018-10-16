@@ -1,0 +1,66 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): jfletcher
+  // Date and time: 04/05/12, 15:32:06
+  // ----------------------------------------------------
+  // Description:
+  //   Stored procedure that monitors method deletes.
+  //   Note that renames are treated as a delete.
+  //
+  //   This process is launched via macro events, no
+  //   setup code is required in the Host.
+  //
+  //   Note: This process does all error handling (errors
+  //   bubble up from the rest of the code).
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($error_l)
+C_BOOLEAN($showError_f)
+
+C_BOOLEAN(VC_DELETE_IgnoreOnce_f)
+
+  // Set up error handling module.
+UTIL_ERR_Startup 
+
+  // METHOD GET PATHS can be slow in larger dbs.
+  // This threshold determines when to warn the user about it.
+<>VCM_MGPThreshold_l:=VC_CONFIG_MGPThresholdGet 
+  //  This flag tells us if the user decided to ignore slow MGP.
+<>VCM_DeleteIgnore_f:=VC_CONFIG_DeleteIgnoreSlowGet 
+
+  // Used for DELAY PROCESS
+<>VC_DeleteProcDelay_l:=VC_CONFIG_DeleteProcDelayGet 
+
+  // Check to see if module is enabled.
+<>VC_ExportMethods_f:=VC_CONFIG_ExportMethodsGet 
+
+  // Error messages are only displayed the first time; the
+  // process will keep running even if there's an error in
+  // case the user fixes it.
+$showError_f:=True
+
+
+Repeat 
+	
+	
+	  // ===================================================================================
+	  // Perform tasks if there is no error.
+	If (<>VC_ERROR_F=False)
+		
+		  // Reset flag to show errors in case it was off.
+		$showError_f:=True
+		
+		  // DON'T ADD METHOD CALLS HERE!
+		  // Add them to "Main", this way changes can be made without restarting the process.
+		$error_l:=VC_DELETE_Main 
+		
+	End if 
+	
+	
+	  // ===================================================================================
+	  // Perform maintenance
+	
+	VC_GEN_ProcessMaintenance ($error_l;->$showError_f;-><>VC_StopDelete_f;<>VC_DeleteProcDelay_l)
+	
+Until (<>VC_StopDelete_f | <>VC_Quit_f)
+
+<>VC_DeleteProcDone_f:=True

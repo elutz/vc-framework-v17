@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+   <!--Translation file.This file is distributed under the same license as the product package.-->
+<xliff version="1.0">
+   <file datatype="x-STR#" original="undefined" source-language="en" target-language="en">
+      <header>
+         <prop-group name="Xliff-Editor.4dbase">
+            <prop prop-type="version">1.0</prop>
+         </prop-group>
+      </header>
+      <body>
+         <group id="18000" resname="Global">
+            <trans-unit id="18001" resname="ERR_Unknown" translate="yes">
+               <source>Unknown error.</source>
+               <target>Unknown error.</target>
+            </trans-unit>
+            <trans-unit id="18002" resname="ERR_4D">
+               <source>Internal 4D Error.</source>
+               <target>Internal 4D Error.</target>
+            </trans-unit>
+            <trans-unit id="18002" resname="null">
+               <source>Invalid error code.</source>
+               <target>Invalid error code.</target>
+            </trans-unit>
+         </group>
+         <group resname="PREF_" id="18100">
+            <trans-unit id="18101" resname="ERR_PREF_NotFound">
+               <source>Preference does not exist.</source>
+               <target>Preference does not exist.</target>
+            </trans-unit>
+            <trans-unit id="18102" resname="ERR_PREF_DeleteFailed">
+               <source>Unable to delete preference.</source>
+               <target>Unable to delete preference.</target>
+            </trans-unit>
+         </group>
+         <group resname="EXT_" id="18200">
+            <trans-unit id="18201" resname="EXT_NotOpen">
+               <source>There are no open connections to close.</source>
+               <target>There are no open connections to close.</target>
+            </trans-unit>
+         </group>
+         <group resname="VC_" id="18300">
+            <trans-unit id="18301" resname="VC_NotEnabled">
+               <source>The component is not enabled.</source>
+               <target>The component is not enabled.</target>
+            </trans-unit>
+         </group>
+         <group resname="HOOK_" id="18400">
+            <trans-unit id="18401" resname="HOOK_UpdateFail">
+               <source>Call to VC_DEVHOOK_Update failed, method will not be saved.</source>
+               <target>Call to VC_DEVHOOK_Update failed, method will not be saved.</target>
+            </trans-unit>
+            <trans-unit id="18402" resname="HOOK_CreateFail ">
+               <source>Call to VC_DEVHOOK_Create failed, method will not be saved.</source>
+               <target>Call to VC_DEVHOOK_Create failed, method will not be saved.</target>
+            </trans-unit>
+            <trans-unit id="18403" resname="HOOK_DeleteFail">
+               <source>Call to VC_DEVHOOK_Delete failed, method will not be deleted.</source>
+               <target>Call to VC_DEVHOOK_Delete failed, method will not be deleted.</target>
+            </trans-unit>
+         </group>
+         <group resname="CLEAN_" id="18500">
+            <trans-unit id="18501" resname="CLEAN_MoveFailed">
+               <source>Unable to rename vc_source folder.</source>
+               <target>Unable to rename vc_source folder.</target>
+            </trans-unit>
+         </group>
+         <group resname="METH_" id="18600">
+            <trans-unit id="18601" resname="METH_BadType">
+               <source>Method type is invalid.  This should never happen unless a new type is added.</source>
+               <target>Method type is invalid.  This should never happen unless a new type is added.</target>
+            </trans-unit>
+         </group>
+         <group resname="FORM_" id="18700">
+            <trans-unit id="18701" resname="FORM_NoMetadata">
+               <source>Form metadata is missing, or form record does not exist.</source>
+               <target>Form metadata is missing, or form record does not exist.</target>
+            </trans-unit>
+         </group>
+         <group resname="WARN_" id="18800">
+            <trans-unit id="18801" resname="ASSET_BadName">
+               <source>Asset path is invalid.  See: http://doc.4d.com/4Dv13/help/Title/en/page701.html</source>
+               <target>Asset path is invalid.  See: http://doc.4d.com/4Dv13/help/Title/en/page701.html</target>
+            </trans-unit>
+            <trans-unit id="18802" resname="ASSET_BadPathsFound">
+               <source>Warning: Some invalid paths found.</source>
+               <target>Warning: Some invalid paths found.</target>
+            </trans-unit>
+         </group>
+         <group resname="IMPORT_" id="20000">
+            <trans-unit id="20001" resname="IMPORT_NothingToImport">
+               <source>There is nothing to import.</source>
+               <target>There is nothing to import.</target>
+            </trans-unit>
+	    <trans-unit id="20002" resname="IMPORT_EmptyMethod">
+               <source>Warning: Method is empty.</source>
+               <target>Warning: Method is empty.</target>
+            </trans-unit>
+	    <trans-unit id="20003" resname="IMPORT_WrongEncoding">
+               <source>Error: Method file isn't in UTF-8 encoding.</source>
+               <target>Error: Method file isn't in UTF-8 encoding.</target>
+            </trans-unit>
+         </group>
+      </body>
+   </file>
+</xliff>

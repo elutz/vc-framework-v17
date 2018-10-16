@@ -1,0 +1,13 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+ARRAY TEXT(<>VCF_BorderLineStyles_at;0)
+ARRAY TEXT(<>VCF_FormEvents_at;0)
+ARRAY TEXT(<>VCF_HorizontalAlign_at;0)
+ARRAY TEXT(<>VCF_HorizontalSizing_at;0)
+ARRAY TEXT(<>VCF_IndicatorType_at;0)
+ARRAY TEXT(<>VCF_ObjectActions_at;0)
+ARRAY TEXT(<>VCF_ObjectTypes_at;0)
+ARRAY TEXT(<>VCF_RGBColors_at;0)
+ARRAY TEXT(<>VCF_SubformPrintFrame_at;0)
+ARRAY TEXT(<>VCF_VariableTypes_at;0)
+ARRAY TEXT(<>VCF_VerticalAlign_at;0)
+ARRAY TEXT(<>VCF_VerticalSizing_at;0)

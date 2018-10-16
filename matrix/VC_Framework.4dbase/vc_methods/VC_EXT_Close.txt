@@ -1,0 +1,81 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework External Database","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/04/12, 13:34:52
+  // ----------------------------------------------------
+  // Description:
+  //   Close connection to external database, if it's
+  //   open and no longer needed.
+  //
+  //   VC_EXT_Open and VC_EXT_Close are meant to be
+  //   used as a pair, but I want to allow nested
+  //   connections (there are commands that require a
+  //   connection).  So I added a counter to track the
+  //   number of connections.  In this way the connection
+  //   is REALLY closed only after the last request is
+  //   made.
+  //
+  //   For a "normal" closure this method does standard
+  //   error handling.  But if an error occurs elsewhere
+  //   in the component, this has a passthrough mechanism
+  //   for the error code.
+  //
+  //   I.e. if an error occurs elsewhere in the component,
+  //   I still need to close the external database and, at
+  //   that point, I don't care if ANOTHER error occurs
+  //   when closing, so I just pass the original error
+  //   code back out.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($1;$error_l)  // This will be passed through if it is non-zero.
+
+C_LONGINT($0;$error_l)
+
+C_BOOLEAN($withErrorHandling_f)
+
+C_LONGINT(VC_EXT_NumConnections_l)
+
+$error_l:=$1
+
+If ($error_l#0)
+	$withErrorHandling_f:=False
+Else 
+	$withErrorHandling_f:=True
+End if 
+
+
+  // Only close if there's really a connection open.
+If (VC_EXT_NumConnections_l>0)
+	
+	  // Decrement the counter.
+	VC_EXT_NumConnections_l:=VC_EXT_NumConnections_l-1
+	
+	  // If the counter is 0, the connection is truly no
+	  // longer needed, close it.
+	If (VC_EXT_NumConnections_l=0)
+		
+		If ($withErrorHandling_f)
+			UTIL_ERR_HandlerInstall 
+		End if 
+		
+		  // Switch back to internal database.
+		Begin SQL
+			USE REMOTE DATABASE DEFAULT;
+		End SQL
+		
+		If ($withErrorHandling_f)
+			$error_l:=UTIL_ERR_HandlerRemove 
+		End if 
+		
+	End if 
+	
+Else 
+	If ($withErrorHandling_f)
+		$error_l:=<>ERR_EXT_NotOpen_l
+	End if 
+End if 
+
+If ($withErrorHandling_f & ($error_l#0))
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

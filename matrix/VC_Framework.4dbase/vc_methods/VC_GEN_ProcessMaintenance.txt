@@ -1,0 +1,50 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 05/16/14, 12:02:49
+  // ----------------------------------------------------
+  // Description:
+  //   Now that I have more than one process, maintaining
+  //   copies of the "maintenance" code is a bit annoying.
+  //
+  //   So this is a wrapper for the maintenance code for
+  //   VC@Process methods.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($1;$error_l)
+C_POINTER($2;$showError_f_p)
+C_POINTER($3;$processStopFlag_f_p)
+C_LONGINT($4;$processDelay_l)
+
+$error_l:=$1
+$showError_f_p:=$2
+$processStopFlag_f_p:=$3
+$processDelay_l:=$4
+
+  // Test for error.
+If ($error_l#0)
+	  // Disable the module.  NOTE: process keeps running in
+	  // case the problem is fixed.
+	<>VC_ERROR_F:=True
+End if 
+
+
+  // <>VC_ERROR_F enables or disables processing. Hint: it's a global flag shared by all processes.
+  // $error_l is the error code for this process. Hint: it may be 0 if another process encountered the error.
+  // $showError_f_p-> indicates if the error message should be displayed or not.
+If ((<>VC_ERROR_F) & ($error_l#0) & ($showError_f_p->))
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+	$showError_f_p->:=False
+End if 
+
+
+  // Only delay if not quitting.
+If (($processStopFlag_f_p->=False) & (<>VC_Quit_f=False))
+	  // This method detects if the database is quitting,
+	  // in addition to delaying the process.
+	<>VC_Quit_f:=UTIL_DelayProcess ($processDelay_l)
+	If (<>VC_Quit_f)
+		$processStopFlag_f_p->:=True
+	End if 
+End if 
+
+IDLE

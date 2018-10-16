@@ -1,0 +1,34 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"executedOnServer":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/11/12, 18:13:57
+  // ----------------------------------------------------
+  // Description:
+  //   Stop stored procedure to monitor deleted methods.
+  //
+  //   Note: executes on server.
+  //
+  //   Called by Macro (so test to see if <>VC_Enabled_f is true)
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($error_l)
+
+C_BOOLEAN(<>VC_Enabled_f)
+
+UTIL_ERR_Startup 
+
+If (<>VC_Enabled_f)
+	<>VC_StopDelete_f:=True
+	  // Wake the process up.
+	DELAY PROCESS(<>VC_DeletePID_l;0)
+	  // Wait for it to finish gracefully.
+	Repeat 
+		DELAY PROCESS(Current process;1)
+	Until (<>VC_DeleteProcDone_f)
+Else 
+	$error_l:=<>ERR_VC_NotEnabled_l
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+End if 

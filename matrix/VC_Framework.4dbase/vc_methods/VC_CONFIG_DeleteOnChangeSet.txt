@@ -1,0 +1,24 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 01/14/14, 11:28:23
+  // ----------------------------------------------------
+  // Description:
+  //   Flag to indicate if the deletion detection code
+  //   will run only when the database stamp is changed,
+  //   or not.
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($1;$deleteOnChange_f)
+
+C_LONGINT($error_l)
+
+$deleteOnChange_f:=$1
+
+$error_l:=VC_EXT_PrefSet (<>VC_LABEL_DeleteOnChange_t;String($deleteOnChange_f))
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+Else 
+	  // Make sure to update IP var.
+	<>VCM_DeleteOnChange_f:=$deleteOnChange_f
+End if 

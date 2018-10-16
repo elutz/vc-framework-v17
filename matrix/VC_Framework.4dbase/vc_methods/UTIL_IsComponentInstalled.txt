@@ -1,0 +1,28 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/11/14, 16:29:33
+  // ----------------------------------------------------
+  // Description:
+  //   Check to see if component is installed.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$componentName_t)
+C_BOOLEAN($0;$found_f)
+
+C_LONGINT($found_l)
+
+ARRAY TEXT($components_at;0)
+
+$componentName_t:=$1
+
+COMPONENT LIST($components_at)
+
+$found_l:=Find in array($components_at;$componentName_t)
+
+If ($found_l>0)
+	$found_f:=True
+Else 
+	$found_f:=False
+End if 
+
+$0:=$found_f

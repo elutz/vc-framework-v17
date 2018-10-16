@@ -1,0 +1,11 @@
+﻿  //%attributes = {"lang":"en"} comment added and reserved by 4D.
+C_LONGINT($formEvent_l)
+
+$formEvent_l:=Form event
+
+Case of 
+	: ($formEvent_l=On Clicked)
+		VC_DELETE_IgnoreOnce_f:=True
+		VC_DELETE_IgnoreAlways_f:=False
+		VC_DELETE_InstallDeleteOnExit_f:=False
+End case 

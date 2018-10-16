@@ -1,0 +1,31 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Monitor","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): jfletcher
+  // Date and time: 04/09/12, 18:21:09
+  // ----------------------------------------------------
+  // Description:
+  //   Wrapper for delay process.  The main additional
+  //   feature is that this method attempts to detect if
+  //   the database is quitting.
+  //
+  //   Of course I could just add an On Exit method to be
+  //   called by the user, but I want this component to
+  //   be zero impact on the host database if possible.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($1;$delay_l)  // Optional, default is 1 second.
+
+C_BOOLEAN($0;$timeToQuit_f)
+
+If (Count parameters>=1)
+	$delay_l:=$1
+Else 
+	$delay_l:=60
+End if 
+
+$timeToQuit_f:=UTIL_IsDatabaseQuitting 
+
+If (Not($timeToQuit_f))
+	DELAY PROCESS(Current process;$delay_l)
+End if 
+
+$0:=$timeToQuit_f

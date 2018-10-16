@@ -1,0 +1,111 @@
+﻿  //%attributes = {"invisible":true,"executedOnServer":true,"folder":"VC_Framework Log","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/20/12, 16:53:42
+  // ----------------------------------------------------
+  // Description:
+  //   Save the error log to disk.
+  //
+  //   Note this is a log of invalid asset names
+  //  (including table, form, and object names).
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+C_TEXT(<>VC_EXT_LogFile_t;$prefix_t;$message_t;$header_t;$assetPath_t;$assetType_t;$endl_t;$tab_t)
+C_TIME($docRef_h)
+C_BLOB($message_b)
+C_LONGINT($i;$limit_l)
+C_OBJECT($assetMetadata_o)
+
+ARRAY TEXT($assetPaths_at;0)
+ARRAY TEXT($assetTypes_at;0)
+ARRAY TEXT($assetMetadata_at;0)
+
+$endl_t:=Char(Carriage return)
+$tab_t:=Char(Tab)
+
+  // Open external database.
+$error_l:=VC_EXT_Open 
+
+If ($error_l=0)
+	
+	  // Get the log data.
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		SELECT
+		   path,
+		   type,
+		   metadata
+		FROM VC_PathErrorLog
+		INTO
+		   :$assetPaths_at,
+		   :$assetTypes_at,
+		   :$assetMetadata_at;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l=0)
+	
+	  // Delete any previous log file.
+	If (Test path name(<>VC_EXT_LogFile_t)=Is a document)
+		DELETE DOCUMENT(<>VC_EXT_LogFile_t)
+	End if 
+	
+	  // Create new log file.
+	$docRef_h:=Create document(<>VC_EXT_LogFile_t)
+	
+	If (OK=1)
+		
+		  // Insert column headers
+		$header_t:="Path"+$tab_t+"Error"+$endl_t
+		CONVERT FROM TEXT($header_t;"UTF-8";$message_b)
+		SEND PACKET($docRef_h;$message_b)
+		
+		  // Loop over each log entry and export to the log file.
+		$i:=1
+		$limit_l:=Size of array($assetPaths_at)
+		
+		If ($limit_l>0)
+			While ($i<=$limit_l)
+				
+				$assetPath_t:=$assetPaths_at{$i}
+				$assetType_t:=$assetTypes_at{$i}
+				$assetMetadata_o:=JSON Parse($assetMetadata_at{$i})
+				
+				$prefix_t:=$assetPath_t+$tab_t
+				$message_t:=""
+				
+				Case of 
+					: ($assetType_t=<>VC_TYPE_Method_t)
+						$message_t:=VC_LOG_GetMessage_method ($assetMetadata_o)
+						
+					: ($assetType_t=<>VC_TYPE_Form_t)
+						$message_t:=VC_LOG_GetMessage_form ($assetMetadata_o)
+						
+				End case 
+				
+				$message_t:=$prefix_t+$message_t+$endl_t
+				
+				  // Insert log entry (don't forgot to convert to UTF-8!).
+				CONVERT FROM TEXT($message_t;"UTF-8";$message_b)
+				SEND PACKET($docRef_h;$message_b)
+				
+				$i:=$i+1
+				
+			End while 
+			
+		End if 
+		CLOSE DOCUMENT($docRef_h)
+	End if 
+	
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

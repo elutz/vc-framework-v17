@@ -1,0 +1,182 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/03/14, 16:03:45
+  // ----------------------------------------------------
+  // Description:
+  //   Determine which updated forms need to be created
+  //   vs updated. These two events require different
+  //   steps in many VC systems but are nearly the same
+  //   for this component so they're both handled here.
+  //
+  //   Another way to say this is the algorithm for
+  //   detecting deletions is completely different.
+  // --[HEADEREND]---------------------------------------
+C_POINTER($1;$formsToSave_at_p)
+C_POINTER($2;$formTableNums_al_p)
+
+C_LONGINT($0;$error_l)
+
+C_LONGINT($numForms_l;$currentTable_l;$currentForm_l;$numFound_l)
+C_TEXT($currentFormName_t;$currentFormPOSIXPath_t)
+C_TEXT($foundAction_t;$foundState_t;$newAction_t;$newState_t;$newMetadata_t)
+C_OBJECT($newMetadata_o)
+
+C_TEXT($progTitle_t)
+C_LONGINT($progID_l;$progThreshold_l)
+C_REAL($progress_r)
+
+$formsToSave_at_p:=$1
+$formTableNums_al_p:=$2
+
+$numForms_l:=Size of array($formsToSave_at_p->)
+
+If ($numForms_l>0)
+	
+	$error_l:=VC_EXT_Open 
+	
+	If ($error_l=0)
+		
+		  // Progress bar setup.
+		If (VC_ProgInstalled_f & (<>VC_Quit_f=False))
+			$progThreshold_l:=1000
+			$progTitle_t:=<>VC_ComponentName_t+" Searching for Form Changes"
+			$progID_l:=PROG_Create ($progTitle_t;$numForms_l;$progThreshold_l)
+		End if 
+		
+		$currentForm_l:=1
+		
+		  // Loop over forms
+		While (($currentForm_l<=$numForms_l) & ($error_l=0))
+			
+			$currentTable_l:=$formTableNums_al_p->{$currentForm_l}
+			$currentFormName_t:=$formsToSave_at_p->{$currentForm_l}
+			$currentFormPOSIXPath_t:=VC_UTIL_FormGetPath ($currentFormName_t;$currentTable_l)
+			
+			  // Progress bar update.
+			If (VC_ProgInstalled_f & (<>VC_Quit_f=False))
+				$progress_r:=$currentForm_l/$numForms_l
+				PROG_Update ($progID_l;$progress_r;$currentForm_l;$numForms_l;$currentFormPOSIXPath_t)
+			End if 
+			
+			  // Check to see if the form already exists in the table.
+			$numFound_l:=0
+			UTIL_ERR_HandlerInstall 
+			Begin SQL
+				SELECT COUNT(ID)
+				FROM VC_Assets
+				WHERE path = :$currentFormPOSIXPath_t
+				AND type = :[<>VC_TYPE_Form_t]
+				INTO :$numFound_l;
+			End SQL
+			$error_l:=UTIL_ERR_HandlerRemove 
+			
+			If ($error_l=0)
+				If ($numFound_l>0)
+					  //====================================================================
+					  // Record exists, this *may* be an update.
+					  //====================================================================
+					
+					  // Form has already been added to table; this could still
+					  // be a create (e.g. if a previous create failed) or an update.
+					
+					  // Need to check existing data.
+					$foundAction_t:=""
+					$foundState_t:=""
+					UTIL_ERR_HandlerInstall 
+					Begin SQL
+						SELECT action, state
+						FROM VC_Assets
+						WHERE path = :$currentFormPOSIXPath_t
+						AND type = :[<>VC_TYPE_Form_t]
+						INTO :$foundAction_t, :$foundState_t;
+					End SQL
+					$error_l:=UTIL_ERR_HandlerRemove 
+					
+					If ($error_l=0)
+						If ($foundAction_t="")
+							  // Check the existing state.
+							If ($foundState_t=<>VC_STATE_Active_t)
+								  // If the record is active, this is an update.
+								$newState_t:=$foundState_t
+								$newAction_t:=<>VC_ACTION_Update_t
+							Else 
+								  // If the record is inactive (deleted) this is a create.
+								  // Example: create a form, delete it, create the same form.
+								$newState_t:=<>VC_STATE_Active_t
+								$newAction_t:=<>VC_ACTION_Create_t
+							End if 
+							
+							  // Update the record.
+							UTIL_ERR_HandlerInstall 
+							Begin SQL
+								UPDATE VC_Assets
+								SET
+								   action = :$newAction_t,
+								   state = :$newState_t
+								WHERE path = :$currentFormPOSIXPath_t
+								AND type = :[<>VC_TYPE_Form_t];
+							End SQL
+							$error_l:=UTIL_ERR_HandlerRemove 
+						Else 
+							  // Never overwrite an existing action; it means the existing
+							  // action has not yet been completed.
+						End if 
+					End if 
+					
+				Else 
+					  //====================================================================
+					  // The form does not exist in the table, this is a create.
+					  //====================================================================
+					OB SET($newMetadata_o;<>VCF_KEY_ParamFormName_t;$currentFormName_t)
+					If ($currentTable_l#0)
+						OB SET($newMetadata_o;<>VCF_KEY_ParamTableNum_t;$currentTable_l)
+					End if 
+					
+					$newMetadata_t:=JSON Stringify($newMetadata_o)
+					
+					$newAction_t:=<>VC_ACTION_Create_t
+					$newState_t:=<>VC_STATE_Active_t
+					UTIL_ERR_HandlerInstall 
+					Begin SQL
+						INSERT INTO VC_Assets
+						(
+						   path,
+						   type,
+						   action,
+						   state,
+						   metadata
+						)
+						VALUES
+						(
+						   :$currentFormPOSIXPath_t,
+						   :[<>VC_TYPE_Form_t],
+						   :$newAction_t,
+						   :$newState_t,
+						   :$newMetadata_t
+						);
+					End SQL
+					$error_l:=UTIL_ERR_HandlerRemove 
+					
+				End if 
+			End if 
+			
+			  // Only increment if there was no error (in case I want to refer back to where I failed).
+			If ($error_l=0)
+				$currentForm_l:=$currentForm_l+1
+			End if 
+			
+		End while   // End loop over forms.
+		
+	End if 
+	
+	  // Close external database.
+	$error_l:=VC_EXT_Close ($error_l)
+	
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

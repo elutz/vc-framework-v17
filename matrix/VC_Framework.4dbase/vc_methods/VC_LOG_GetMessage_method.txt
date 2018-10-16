@@ -1,0 +1,74 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/18/14, 17:03:55
+  // ----------------------------------------------------
+  // Description:
+  //   Convert log data to error message for Method.
+  // --[HEADEREND]---------------------------------------
+C_OBJECT($1;$methodMetadata_o)
+
+C_TEXT($0;$message_t)
+
+C_LONGINT($methodType_l)
+C_TEXT($tableName_t;$objectName_t;$formObjectName_t)
+C_BOOLEAN($tableNameInvalid_f;$ObjectNameInvalid_f;$FormObjectNameInvalid_f)
+
+$methodType_l:=OB Get($methodMetadata_o;<>VCM_KEY_methodType_t)
+$tableName_t:=OB Get($methodMetadata_o;<>VCM_KEY_tableName_t)
+$objectName_t:=OB Get($methodMetadata_o;<>VCM_KEY_objectName_t)
+$formObjectName_t:=OB Get($methodMetadata_o;<>VCM_KEY_formObjectName_t)
+$tableNameInvalid_f:=OB Get($methodMetadata_o;<>VCM_KEY_tableNameInvalid_t)
+$ObjectNameInvalid_f:=OB Get($methodMetadata_o;<>VCM_KEY_objectNameInvalid_t)
+$FormObjectNameInvalid_f:=OB Get($methodMetadata_o;<>VCM_KEY_formObjectNameInvalid_t)
+
+  // Use the method type to determine which kinds of errors are possible.
+Case of 
+	: ($methodType_l=Path project method)
+		  // For a project method there can be only one error (object name).
+		ASSERT($tableNameInvalid_f=False)
+		ASSERT($FormObjectNameInvalid_f=False)
+		ASSERT($ObjectNameInvalid_f=True)
+		
+		  // Only one possible error.
+		$message_t:="Project Method name '"+$objectName_t+"' is not valid."
+		
+		
+	: ($methodType_l=Path table form)
+		  // For a table form there are three possible errors: table name, form name, and object name.
+		If ($tableNameInvalid_f=True)
+			$message_t:="Table name '"+$tableName_t+"' is not valid."
+		End if 
+		If ($ObjectNameInvalid_f=True)
+			$message_t:=$message_t+"Form name '"+$objectName_t+"' is not valid."
+		End if 
+		If ($FormObjectNameInvalid_f=True)
+			$message_t:=$message_t+"Object name '"+$formObjectName_t+"' is not valid."
+		End if 
+		
+		
+	: ($methodType_l=Path project form)
+		  // For a Project Form there are two possible errors: form name and object name.
+		ASSERT($tableNameInvalid_f=False)
+		
+		If ($ObjectNameInvalid_f=True)
+			$message_t:=$message_t+"Form name '"+$objectName_t+"' is not valid."
+		End if 
+		If ($FormObjectNameInvalid_f=True)
+			$message_t:=$message_t+"Object name '"+$formObjectName_t+"' is not valid."
+		End if 
+		
+		
+	: ($methodType_l=Path trigger)
+		  // For a trigger method there can be only one error (table name).
+		ASSERT($ObjectNameInvalid_f=False)
+		ASSERT($FormObjectNameInvalid_f=False)
+		ASSERT($tableNameInvalid_f=True)
+		
+		$message_t:="Table name '"+$tableName_t+"' is not valid."
+		
+	Else 
+		$message_t:=UTIL_ERR_GetErrorMessage (<>ERR_METH_BadType_l)
+End case 
+
+$0:=$message_t

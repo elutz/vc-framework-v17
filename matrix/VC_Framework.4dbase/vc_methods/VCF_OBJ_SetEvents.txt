@@ -1,0 +1,43 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // ----------------------------------------------------
+  // Description:
+  //   Wrapper for OBJECT GET EVENTS, convert events to
+  //   JSON for the given object.
+  //
+  //   If the object name is blank, get form events.
+  // --[HEADEREND]---------------------------------------
+C_OBJECT($1;$theObject_o)
+C_TEXT($2;$theObjectName_t)
+
+C_LONGINT($numEvents_l;$currentEventPos_l;$currentEvent_l)
+
+C_OBJECT($currentEvent_o)
+
+ARRAY LONGINT($theEvents_al;0)
+ARRAY OBJECT($theEvents_ao;0)
+
+$theObject_o:=$1
+$theObjectName_t:=$2  // Pass empty string to get Form Events.
+
+  // REMINDER: if there is no object method, this command returns no events.
+OBJECT GET EVENTS(*;$theObjectName_t;$theEvents_al)
+
+$numEvents_l:=Size of array($theEvents_al)
+
+If ($numEvents_l>0)
+	For ($currentEventPos_l;1;$numEvents_l)
+		
+		CLEAR VARIABLE($currentEvent_o)
+		
+		$currentEvent_l:=$theEvents_al{$currentEventPos_l}
+		
+		OB SET($currentEvent_o;"event";$currentEvent_l)
+		OB SET($currentEvent_o;"event-label";<>VCF_FormEvents_at{$currentEvent_l})
+		
+		APPEND TO ARRAY($theEvents_ao;$currentEvent_o)
+	End for 
+	
+	OB SET ARRAY($theObject_o;"events";$theEvents_ao)
+End if 

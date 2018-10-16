@@ -1,0 +1,31 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/28/14, 15:56:31
+  // ----------------------------------------------------
+  // Description:
+  //   Wrapper method for VC_DELETE_Process tasks.
+  //
+  //   This is so changes can be made without restarting
+  //   the process.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+If (<>VC_ExportMethods_f)
+	$error_l:=VCM_EXPORT_FindDelete 
+	
+	  // Measure deletion detection performance.
+	If ($error_l=0)
+		If (VC_DELETE_PerfTestNecessary )
+			  // Check to see how fast it was.
+			$error_l:=VC_DELETE_PerfTest 
+		End if 
+	End if 
+End if 
+
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

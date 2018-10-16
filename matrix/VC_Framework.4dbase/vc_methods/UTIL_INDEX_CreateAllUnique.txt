@@ -1,0 +1,49 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/10/14, 18:07:51
+  // ----------------------------------------------------
+  // Description:
+  //   Create indexes for any unique fields that don't
+  //   have one.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($statement_t;$indexName_t;$currentTable_t;$currentColumn_t)
+C_LONGINT($i;$numFields_l;$found_l)
+
+ARRAY TEXT($tableNames_at;0)
+ARRAY TEXT($columnNames_at;0)
+
+  // Find all unique fields in the database.
+Begin SQL
+	SELECT TABLE_NAME, COLUMN_NAME
+	FROM _USER_COLUMNS
+	WHERE UNIQUENESS = TRUE
+	INTO :$tableNames_at, :$columnNames_at;
+End SQL
+
+$numFields_l:=Size of array($columnNames_at)
+
+For ($i;1;$numFields_l)
+	$currentTable_t:=$tableNames_at{$i}
+	$currentColumn_t:=$columnNames_at{$i}
+	
+	  // Make sure they are indexed.
+	$found_l:=0
+	Begin SQL
+		SELECT COUNT( INDEX_ID )
+		FROM _USER_IND_COLUMNS
+		WHERE TABLE_NAME LIKE :$currentTable_t
+		AND COLUMN_NAME LIKE :$currentColumn_t
+		INTO :$found_l;
+	End SQL
+	
+	  // If not, add an index.
+	If ($found_l=0)
+		$indexName_t:=$currentTable_t+"_"+$currentColumn_t+"_index"
+		$statement_t:=""
+		$statement_t:=$statement_t+"CREATE INDEX "+$indexName_t+" ON "+$currentTable_t+" ("+$currentColumn_t+");"
+		Begin SQL
+			EXECUTE IMMEDIATE :$statement_t;
+		End SQL
+	End if 
+End for 

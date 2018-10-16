@@ -1,0 +1,16 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/11/14, 12:11:20
+  // ----------------------------------------------------
+  // Description:
+  //   Use this to completely disable VC_Framework.
+  //   Useful when modifying code that's currently
+  //   executing; i.e. when developing new features.
+  //
+  //   To be clear, you must edit this method (change false
+  //   to true or vice versa).
+  // --[HEADEREND]---------------------------------------
+C_BOOLEAN($0)
+
+$0:=False

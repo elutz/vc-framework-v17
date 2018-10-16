@@ -1,0 +1,13 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+ARRAY TEXT(cachedCurrentPaths_at;0)
+ARRAY TEXT(cachedFormNames_at;0)
+ARRAY LONGINT(cachedTableNums_al;0)
+ARRAY TEXT(Column1;0)
+ARRAY TEXT(Combo Box;0)
+ARRAY BOOLEAN(List Box;0)
+ARRAY TEXT(Popup Drop down List;0)
+ARRAY TEXT(Tab Control;0)
+ARRAY LONGINT(UTIL_ERR_4DStackCodes_al;0)
+ARRAY TEXT(UTIL_ERR_4DStackComp_at;0)
+ARRAY TEXT(UTIL_ERR_4DStackErrors_at;0)
+ARRAY TEXT(UTIL_ERR_CallChain_at;0)

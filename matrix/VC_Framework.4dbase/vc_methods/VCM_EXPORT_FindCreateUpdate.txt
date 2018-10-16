@@ -1,0 +1,167 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Method Export","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 10/11/12, 12:52:36
+  // ----------------------------------------------------
+  // Description:
+  //   Determine which updated methods need to be created
+  //   vs updated. These two events require different
+  //   steps in many VC systems but are nearly the same
+  //   for this component so they're both handled here.
+  //
+  //   Another way to say it is the algorithm for
+  //   detecting deletions is completely different.
+  // --[HEADEREND]---------------------------------------
+C_POINTER($1;$methodsToSave_p_at)
+
+C_LONGINT($0;$error_l)
+
+C_LONGINT($numMethods_l;$currentMethod_l;$numFound_l)
+C_TEXT($currentMethodPath_t;$foundAction_t;$foundState_t;$newAction_t;$newState_t)
+
+C_TEXT($progTitle_t)
+C_LONGINT($progID_l;$progThreshold_l)
+C_REAL($progress_r)
+
+$methodsToSave_p_at:=$1
+
+$numMethods_l:=Size of array($methodsToSave_p_at->)
+
+If ($numMethods_l>0)
+	
+	$error_l:=VC_EXT_Open 
+	
+	If ($error_l=0)
+		
+		If (VC_ProgInstalled_f & (<>VC_Quit_f=False))
+			  // Progress bar setup.
+			$progThreshold_l:=1000
+			$progTitle_t:=<>VC_ComponentName_t+" Searching for Method Changes"
+			$progID_l:=PROG_Create ($progTitle_t;$numMethods_l;$progThreshold_l)
+		End if 
+		
+		$currentMethod_l:=1
+		
+		  // Loop over each method to check...
+		While (($currentMethod_l<=$numMethods_l) & ($error_l=0))
+			
+			$currentMethodPath_t:=$methodsToSave_p_at->{$currentMethod_l}
+			
+			If (VC_ProgInstalled_f & (<>VC_Quit_f=False))
+				$progress_r:=$currentMethod_l/$numMethods_l
+				PROG_Update ($progID_l;$progress_r;$currentMethod_l;$numMethods_l;$currentMethodPath_t)
+			End if 
+			
+			  // Check to see if the method already exists in the table.
+			$numFound_l:=0
+			UTIL_ERR_HandlerInstall 
+			Begin SQL
+				SELECT COUNT(ID)
+				FROM VC_Assets
+				WHERE path = :$currentMethodPath_t
+				AND type = :[<>VC_TYPE_Method_t]
+				INTO :$numFound_l;
+			End SQL
+			$error_l:=UTIL_ERR_HandlerRemove 
+			
+			If ($error_l=0)
+				If ($numFound_l>0)
+					  //====================================================================
+					  // Record exists, this *may* be an update.
+					  //====================================================================
+					
+					  // Method has already been added to table; this could still
+					  // be a create (e.g. if a previous create failed) or an update.
+					
+					  // Need to check existing data.
+					$foundAction_t:=""
+					$foundState_t:=""
+					UTIL_ERR_HandlerInstall 
+					Begin SQL
+						SELECT action, state
+						FROM VC_Assets
+						WHERE path = :$currentMethodPath_t
+						AND type = :[<>VC_TYPE_Method_t]
+						INTO :$foundAction_t, :$foundState_t;
+					End SQL
+					$error_l:=UTIL_ERR_HandlerRemove 
+					
+					If ($error_l=0)
+						If ($foundAction_t="")
+							  // Check the existing state.
+							If ($foundState_t=<>VC_STATE_Active_t)
+								  // If the record is active, this is an update.
+								$newState_t:=$foundState_t
+								$newAction_t:=<>VC_ACTION_Update_t
+							Else 
+								  // If the record is inactive (deleted) this is a create.
+								  // Example: create a method, delete it, create method with same name.
+								$newState_t:=<>VC_STATE_Active_t
+								$newAction_t:=<>VC_ACTION_Create_t
+							End if 
+							
+							  // Update the record.
+							UTIL_ERR_HandlerInstall 
+							Begin SQL
+								UPDATE VC_Assets
+								SET
+								   action = :$newAction_t,
+								   state = :$newState_t
+								WHERE path = :$currentMethodPath_t
+								AND type = :[<>VC_TYPE_Method_t];
+							End SQL
+							$error_l:=UTIL_ERR_HandlerRemove 
+						Else 
+							  // Never overwrite an existing action; it means the existing
+							  // action has not yet been completed.
+						End if 
+					End if 
+					
+				Else 
+					  //====================================================================
+					  // The method does not exist in the table, this is a create.
+					  //====================================================================
+					$newAction_t:=<>VC_ACTION_Create_t
+					$newState_t:=<>VC_STATE_Active_t
+					UTIL_ERR_HandlerInstall 
+					Begin SQL
+						INSERT INTO VC_Assets
+						(
+						   path,
+						   type,
+						   action,
+						   state
+						)
+						VALUES
+						(
+						   :$currentMethodPath_t,
+						   :[<>VC_TYPE_Method_t],
+						   :$newAction_t,
+						   :$newState_t
+						);
+					End SQL
+					$error_l:=UTIL_ERR_HandlerRemove 
+					
+				End if 
+			End if 
+			
+			  // Only increment if there was no error (in case I want to refer back to where I failed).
+			If ($error_l=0)
+				$currentMethod_l:=$currentMethod_l+1
+			End if 
+			
+		End while 
+		
+	End if 
+	
+	  // Close external database.
+	$error_l:=VC_EXT_Close ($error_l)
+	
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

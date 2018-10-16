@@ -1,0 +1,38 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/18/14, 17:57:37
+  // ----------------------------------------------------
+  // Description:
+  //   Check to see if index exists in VC_Data database.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$indexName_t)
+
+C_BOOLEAN($0;$indexExists_f)
+
+C_LONGINT($found_l;$error_l)
+
+$indexName_t:=$1
+
+$error_l:=VC_EXT_Open 
+If ($error_l=0)
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		SELECT COUNT( INDEX_ID )
+		FROM _USER_IND_COLUMNS
+		WHERE INDEX_NAME LIKE :$indexName_t
+		INTO :$found_l;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+If ($error_l=0)
+	If ($found_l#0)
+		$indexExists_f:=True
+	End if 
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+$0:=$indexExists_f

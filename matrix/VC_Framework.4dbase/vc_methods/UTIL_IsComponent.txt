@@ -1,0 +1,11 @@
+﻿  //%attributes = {"invisible":true,"folder":"Generic Methods","lang":"en"} comment added and reserved by 4D.
+  // ----------------------------------------------------
+  // User name (OS): Add Komoncharoensiri
+  // Date and time: 02/15/11, 13:44:40
+  // ----------------------------------------------------
+  // Description
+  //   Returns true if the code is being executed from a
+  //   component
+  // ----------------------------------------------------
+C_BOOLEAN($0)
+$0:=Structure file#Structure file(*)

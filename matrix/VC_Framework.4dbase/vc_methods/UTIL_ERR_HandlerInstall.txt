@@ -1,0 +1,24 @@
+﻿  //%attributes = {"invisible":true,"folder":"Error Handling","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): jfletcher
+  // Date and time: 04/05/12, 16:18:59
+  // ----------------------------------------------------
+  // Description:
+  //   Install error handler but preserve any previous one.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;newErrorHandler_t)
+
+C_TEXT(oldErrorHandler_t;UTIL_ERR_GenericHandler_t)
+
+UTIL_ERR_HandlerPrep 
+
+If (Count parameters>=1)
+	newErrorHandler_t:=$1
+Else 
+	newErrorHandler_t:=UTIL_ERR_GenericHandler_t
+End if 
+
+  // Be sure to preserve current error handler, if any.
+oldErrorHandler_t:=Method called on error
+
+ON ERR CALL(newErrorHandler_t)

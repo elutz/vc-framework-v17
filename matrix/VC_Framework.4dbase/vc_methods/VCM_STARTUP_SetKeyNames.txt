@@ -1,0 +1,34 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 06/27/14, 16:53:54
+  // ----------------------------------------------------
+  // Description:
+  //   Names from various key/value pairs. Used for
+  //   C_OBJECTs.
+  //
+  //   This is done to avoid "magic numbers" in the source.
+  // --[HEADEREND]---------------------------------------
+C_TEXT(<>VCM_KEY_methodMetaData_t)
+
+<>VCM_KEY_methodMetaData_t:="methodMetaData"
+
+C_TEXT(<>VCM_KEY_methodType_t)
+C_TEXT(<>VCM_KEY_tableName_t)
+C_TEXT(<>VCM_KEY_objectName_t)
+C_TEXT(<>VCM_KEY_formObjectName_t)
+C_TEXT(<>VCM_KEY_tableNameInvalid_t)
+C_TEXT(<>VCM_KEY_objectNameInvalid_t)
+C_TEXT(<>VCM_KEY_formObjectNameInvalid_t)
+
+<>VCM_KEY_methodType_t:="methodType"
+<>VCM_KEY_tableName_t:="tableName"
+<>VCM_KEY_objectName_t:="objectName"
+<>VCM_KEY_formObjectName_t:="formObjectName"
+<>VCM_KEY_tableNameInvalid_t:="tableNameInvalid"
+<>VCM_KEY_objectNameInvalid_t:="ObjectNameInvalid"
+<>VCM_KEY_formObjectNameInvalid_t:="formObjectNameInvalid"
+
+C_TEXT(<>VCM_KEY_ErrorCode_t)
+
+<>VCM_KEY_ErrorCode_t:="errorCode"

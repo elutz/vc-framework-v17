@@ -1,0 +1,35 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // ===================================================================================
+  // General
+
+
+  // ===================================================================================
+  // VCM
+
+
+  // ===================================================================================
+  // VCF
+
+
+  // ===================================================================================
+  // Future nice-to-have features:
+
+  // Convert ALL strings to xliff
+
+  // UTIL_MethodExists should return an error code; it's one of the places where I call MGP with a zero stamp.
+
+  // Add and remove macros depending on process state?  E.g.:
+  //   -If the process is running, hide the start Macro.
+  //   -If the process exits, restore the start Macro, hide the stop macro.
+
+  // Show progress bar, error messages, and warnings on client in client-server.
+  //   -Note: will be ALL clients unless I start tracking users...
+  //   -I've got stuff like VC_DELETE_Stop that executes on the server but may display an error. I should change this so that the error handling is on the client. Just make a wrapper that executes on the client (and call that from the macro).
+  //   -I've also got progress bars that may be displayed on the server.
+
+  // Optional FORM SCREENSHOT feature.
+
+  // Move all exported content to a common root folder?
+  //   -The issue is I don't want to end up with "vc_lists", "vc_menubars", "vc_stylesheets" all sitting at the root.
+  //   -Maybe I'll cross this bridge when I have more than two modules?
+

@@ -1,0 +1,16 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/16/14, 11:54:18
+  // ----------------------------------------------------
+  // Description:
+  //   Debugging method to browse the contents of the
+  //   external database.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($mode_t;$path_t)
+$mode_t:="external"
+$path_t:=VC_EXT_GetPath 
+
+If (UTIL_IsComponentInstalled ("sql-query-browser"))
+	EXECUTE METHOD("SQLQB_Start";*;$mode_t;$path_t)
+End if 

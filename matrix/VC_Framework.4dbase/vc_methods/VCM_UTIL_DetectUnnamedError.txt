@@ -1,0 +1,46 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 05/15/14, 12:05:34
+  // ----------------------------------------------------
+  // Description:
+  //    4D may return this error when On Startup or On
+  //    Exit are executing and the database contains
+  //    "abnormal" forms.
+  //
+  //    The side effect is VC_Framework may unexpectedly
+  //    delete exported methods that still exist in the
+  //    database. So I need to disable the export in these
+  //    cases:
+  //
+  //    If the user uses a macro to launch VC_Framework
+  //    there's no problem at runtime, only when quitting.
+  //
+  //    If the user has the On Startup code installed, I
+  //    need to skip the export somehow until On Startup
+  //    finsihes.
+  //
+  //    If the user has the On Exit code installed, I
+  //    need to disable the export period.
+  //
+  //    This case should actually be taken care of now
+  //    that I have error handling via VC_ERR_HandleMGP.
+  //    VC_DELETE_OnExit should fail silently...which is
+  //    not necessarily a good thing, the user might not
+  //    be aware of the failure but at least they won't
+  //    lose a bunch of their methods.
+  //
+  //    NOTE: Call this sparingly. In a large database it
+  //    will hang design mode.  Don't call it in a
+  //    runtime loop, for example.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($zeroStamp_l;$error_l)
+ARRAY TEXT($currentPaths_at;0)
+
+<>VCM_ERR_UnnamedErrorDetected_f:=False
+
+UTIL_ERR_HandlerInstall ("VC_ERR_HandleMGP")
+METHOD GET PATHS(Path all objects;$currentPaths_at;$zeroStamp_l;*)
+$error_l:=UTIL_ERR_HandlerRemove 
+
+$0:=<>VCM_ERR_UnnamedErrorDetected_f

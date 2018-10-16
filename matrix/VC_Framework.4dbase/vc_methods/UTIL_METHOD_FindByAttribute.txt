@@ -1,0 +1,41 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/17/14, 11:44:45
+  // ----------------------------------------------------
+  // Description:
+  //   Locate all Project methods with the requested
+  //   attribute set to True.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($1;$attributeType_l)
+C_POINTER($2;$methodsWithAttribute_at_p)
+
+C_LONGINT($i;$limit_l;$zeroStamp_l;$error_l)
+C_BOOLEAN($attributeValue_f;$success_f)
+
+$attributeType_l:=$1
+$methodsWithAttribute_at_p:=$2
+
+$zeroStamp_l:=0
+ARRAY TEXT($methodPaths_at;0)
+
+UTIL_ERR_HandlerInstall 
+METHOD GET PATHS(Path project method;$methodPaths_at;$zeroStamp_l;*)
+$error_l:=UTIL_ERR_HandlerRemove 
+
+$limit_l:=Size of array($methodPaths_at)
+
+For ($i;1;$limit_l)
+	$attributeValue_f:=METHOD Get attribute($methodPaths_at{$i};$attributeType_l;*)
+	
+	If ($attributeValue_f=True)
+		APPEND TO ARRAY($methodsWithAttribute_at_p->;$methodPaths_at{$i})
+	End if 
+	
+End for 
+
+If ($error_l=0)
+	$success_f:=True
+End if 
+
+$0:=$success_f

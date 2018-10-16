@@ -1,0 +1,23 @@
+﻿  //%attributes = {"invisible":true,"executedOnServer":true,"folder":"VC_Framework Log","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/20/12, 16:56:48
+  // ----------------------------------------------------
+  // Description:
+  //   Launch log export process.
+  //
+  //   Note this isn't meant to be called by the user, so
+  //   it's not shared.
+  //
+  //   Note: executes on server.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($stack_l;$PID_l)
+C_TEXT($methodName_t;$processName_t)
+
+C_TEXT(<>VC_ComponentName_t)
+
+$stack_l:=1024*1024
+$methodName_t:="VC_LOG_Process"
+$processName_t:=<>VC_ComponentName_t+" Log process"
+
+$PID_l:=New process($methodName_t;$stack_l;$processName_t;*)

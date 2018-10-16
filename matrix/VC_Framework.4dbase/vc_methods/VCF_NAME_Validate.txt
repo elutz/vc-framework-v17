@@ -1,0 +1,70 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/18/12, 15:33:53
+  // ----------------------------------------------------
+  // Description:
+  //   Validate the parts that make up form paths.  In
+  //   particular table names and form names must conform
+  //   to 4D identifier rules.
+  //
+  //   This is necessary because invalid characters will
+  //   prevent the ability to create the file on disk for
+  //   the form.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$formName_t)
+C_LONGINT($2;$tableNum_l)
+
+C_OBJECT($0;$error_o)
+
+C_TEXT($tableName_t)
+C_LONGINT($error_l)
+C_POINTER($table_p)
+C_BOOLEAN($tableNameInvalid_f;$formNameInvalid_f)
+C_OBJECT($formMetaData_o)
+
+$formName_t:=$1
+
+If (Count parameters>=2)
+	$tableNum_l:=$2
+Else 
+	$tableNum_l:=0
+End if 
+
+OB SET($error_o;<>VCF_KEY_ErrorCode_t;0)  // Indicates names are valid.
+
+$tableNameInvalid_f:=False
+$formNameInvalid_f:=False
+
+  // Check $formName_t.
+$formNameInvalid_f:=Not(UTIL_IsIdentifier ($formName_t))
+
+  // Check the table name.
+If ($tableNum_l#0)
+	$table_p:=Table($tableNum_l)
+	$tableName_t:=Table name($table_p)
+	$tableNameInvalid_f:=Not(UTIL_IsIdentifier ($tableName_t))
+End if 
+
+
+  // This method creates metadata that is useful for later logging.
+  // Rather than create the metadata again during logging, I'll just return the data.
+If ($formNameInvalid_f | $tableNameInvalid_f)
+	$error_l:=<>WARN_ASSET_BadName_L
+	OB SET($error_o;<>VCF_KEY_ErrorCode_t;$error_l)
+	
+	OB SET($formMetaData_o;<>VCF_KEY_formName_t;$formName_t)
+	OB SET($formMetaData_o;<>VCF_KEY_tableName_t;$tableName_t)
+	OB SET($formMetaData_o;<>VCF_KEY_formNameInvalid_t;$formNameInvalid_f)
+	OB SET($formMetaData_o;<>VCF_KEY_tableNameInvalid_t;$tableNameInvalid_f)
+	
+	OB SET($error_o;<>VCF_KEY_formMetaData_t;$formMetaData_o)
+End if 
+
+
+If (($error_l#0) & ($error_l#<>WARN_ASSET_BadName_L))
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+
+$0:=$error_o

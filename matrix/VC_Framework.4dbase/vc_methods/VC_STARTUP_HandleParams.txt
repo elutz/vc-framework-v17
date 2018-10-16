@@ -1,0 +1,64 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/28/14, 16:32:19
+  // ----------------------------------------------------
+  // Description:
+  //   Handle any parameters the user passed to the
+  //   startup code.
+  //
+  //   Possible parameters:
+  //
+  // |-----------------------|---------|---------|---------------------------------------------------------------------------------------------------------------------------|
+  // | Parameter             | Type    | Default | Description                                                                                                               |
+  // |-----------------------|---------|---------|---------------------------------------------------------------------------------------------------------------------------|
+  // | VC_DeleteIgnoreSlow   | Boolean | False   | Deletion detection can have a performance impact. This setting controls whether or not to ignore it.                      |
+  // | VC_DeleteOnChange     | Boolean | False   | Only check for deleted methods if the database stamp has changed.                                                         |
+  // | VC_DeleteProcDelay    | Longint | 60      | Delay for the process that detects deleted methods. Measured in ticks.                                                    |
+  // | VC_DeleteProcDisabled | Boolean | False   | Enable or disable the deletion detection process.                                                                         |
+  // | VC_ExportForms        | Boolean | True    | Enable or disable form export.                                                                                            |
+  // | VC_ExportMethods      | Boolean | True    | Enable or disable method export.                                                                                          |
+  // | VC_ExportProcDelay    | Longint | 60      | Delay for the process that detects changes and exports them. Measured in ticks.                                           |
+  // | VC_DeleteMGPThreshold | Longint | 100     | Deletion detection can have a performance impact. This setting controls the tolerance of that impact.  Default is 100 ms. |
+  // |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  //
+  // --[HEADEREND]---------------------------------------
+C_OBJECT($1;$startupParameters_o)
+
+C_LONGINT($0;$error_l)
+
+C_TEXT($currentParamLabel_t)
+C_LONGINT($currentParam_l;$numParams_l)
+
+ARRAY TEXT($possibleParams_at;0)
+
+$startupParameters_o:=$1
+
+APPEND TO ARRAY($possibleParams_at;<>VC_LABEL_DeleteIgnoreSlow_t)
+APPEND TO ARRAY($possibleParams_at;<>VC_LABEL_DeleteOnChange_t)
+APPEND TO ARRAY($possibleParams_at;<>VC_LABEL_DeleteProcDelay_t)
+APPEND TO ARRAY($possibleParams_at;<>VC_LABEL_DeleteProcDisabled_t)
+APPEND TO ARRAY($possibleParams_at;<>VC_LABEL_ExportForms_t)
+APPEND TO ARRAY($possibleParams_at;<>VC_LABEL_ExportMethods_t)
+APPEND TO ARRAY($possibleParams_at;<>VC_LABEL_ExportProcDelay_t)
+APPEND TO ARRAY($possibleParams_at;<>VC_LABEL_DeleteMGPThreshold_t)
+
+$numParams_l:=Size of array($possibleParams_at)
+
+While (($currentParam_l<=$numParams_l) & ($error_l=0))
+	$currentParamLabel_t:=$possibleParams_at{$currentParam_l}
+	If (OB Is defined($startupParameters_o;$currentParamLabel_t))
+		$error_l:=VC_EXT_PrefSet ($currentParamLabel_t;OB Get($startupParameters_o;$currentParamLabel_t))
+	End if 
+	
+	If ($error_l=0)
+		$currentParam_l:=$currentParam_l+1
+	End if 
+End while 
+
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l

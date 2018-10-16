@@ -1,0 +1,6 @@
+﻿  //%attributes = {"lang":"en"} comment added and reserved by 4D.
+If (Selected record number(Current form table->)<0)
+	vRecNum:=""
+Else 
+	vRecNum:=String(Selected record number(Current form table->))+" of "+String(Records in selection(Current form table->))
+End if 

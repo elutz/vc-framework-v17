@@ -1,0 +1,39 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework External Database","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/20/12, 16:42:30
+  // ----------------------------------------------------
+  // Description:
+  //   Delete a log record from the log table.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$assetPath_t)
+C_TEXT($2;$assetType_t)
+
+C_LONGINT($0;$error_l)
+
+$assetPath_t:=$1
+$assetType_t:=$2
+
+  // Open external database.
+$error_l:=VC_EXT_Open 
+
+If ($error_l=0)
+	  // Delete log record.
+	UTIL_ERR_HandlerInstall 
+	Begin SQL
+		DELETE FROM VC_PathErrorLog
+		WHERE path = :$assetPath_t
+		AND type = :$assetType_t;
+	End SQL
+	$error_l:=UTIL_ERR_HandlerRemove 
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

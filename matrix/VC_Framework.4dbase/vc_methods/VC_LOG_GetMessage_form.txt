@@ -1,0 +1,32 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/18/14, 17:03:19
+  // ----------------------------------------------------
+  // Description:
+  //   Convert log data to error message for form.
+  // --[HEADEREND]---------------------------------------
+C_OBJECT($1;$formMetaData_o)
+
+C_TEXT($0;$message_t)
+
+C_TEXT($tableName_t;$formName_t)
+C_BOOLEAN($tableNameInvalid_f;$formNameInvalid_f)
+
+$formName_t:=OB Get($formMetaData_o;<>VCF_KEY_formName_t)
+$tableName_t:=OB Get($formMetaData_o;<>VCF_KEY_tableName_t)
+$tableNameInvalid_f:=OB Get($formMetaData_o;<>VCF_KEY_tableNameInvalid_t)
+$formNameInvalid_f:=OB Get($formMetaData_o;<>VCF_KEY_formNameInvalid_t)
+
+If ($tableNameInvalid_f)
+	$message_t:="Table name '"+$tableName_t+"' is not valid."
+End if 
+
+If ($formNameInvalid_f)
+	If ($message_t#"")
+		$message_t:=$message_t+" "
+	End if 
+	$message_t:=$message_t+"Form name '"+$formName_t+"' is not valid."
+End if 
+
+$0:=$message_t

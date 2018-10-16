@@ -1,0 +1,147 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/24/14, 11:42:52
+  // ----------------------------------------------------
+  // Description:
+  //   Search for forms that have been deleted.
+  //
+  //   Note: this method searches every form in the
+  //   database, every time. In large databases the
+  //   liklehood of a progress bar appearing is quite
+  //   high. I don't want a progress bar to open every
+  //   time the code is checked. So I removed the
+  //   progress module from this method (and also
+  //   optimized it to be faster).
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+C_LONGINT(VCF_FGPduration_l;VCF_FGPcount_l)
+
+C_LONGINT($numFormsInTable_l;$numFormsInDB_l;$currentForm_l;$zeroStamp_l;$pos_l)
+C_LONGINT($begin_l;$end_l)
+C_TEXT($currentFormPath_t;$newAction_t;$stateFilter_t)
+C_BOOLEAN($formExists_f)
+
+ARRAY TEXT($formsInDatabase_at;0)
+ARRAY TEXT($formsInTable_at;0)
+
+ARRAY TEXT($formNames_at;0)
+ARRAY LONGINT($formTableNums_al;0)
+
+$zeroStamp_l:=0
+
+  // ====================================================================
+  // Get all forms in the database.
+  // Note: need to execute this before any call to VC_EXT_Open because
+  // this is talking to the host database.
+$begin_l:=Milliseconds
+$error_l:=VCF_EXPORT_FormGet (->$zeroStamp_l;->$formNames_at;->$formTableNums_al)
+$end_l:=Milliseconds
+  // For methods I ran into a design mode hang when getting the paths in
+  // large databases.
+  // Everything I have seen testing forms indicates this should not be
+  // an issue but I'm going to leave this metric in place just in case.
+If ($error_l=0)
+	VCF_FGPduration_l:=$end_l-$begin_l
+	VCF_FGPcount_l:=VCF_FGPcount_l+1
+End if 
+  // Convert them to paths for easier comparison.
+If ($error_l=0)
+	$numFormsInDB_l:=Size of array($formNames_at)
+	For ($currentForm_l;1;$numFormsInDB_l)
+		$currentFormPath_t:=VC_UTIL_FormGetPath ($formNames_at{$currentForm_l};$formTableNums_al{$currentForm_l})
+		APPEND TO ARRAY($formsInDatabase_at;$currentFormPath_t)
+	End for 
+End if 
+
+
+  // ====================================================================
+  // Get all forms in the asset table.
+If ($error_l=0)
+	$error_l:=VC_EXT_Open 
+	If ($error_l=0)
+		  // Get only active records.
+		  // I.e. ignore previously deleted forms.
+		$stateFilter_t:=<>VC_STATE_Active_t
+		UTIL_ERR_HandlerInstall 
+		Begin SQL
+			SELECT path
+			FROM VC_Assets
+			WHERE state = :$stateFilter_t
+			AND type = :[<>VC_TYPE_Form_t]
+			INTO :$formsInTable_at;
+		End SQL
+		$error_l:=UTIL_ERR_HandlerRemove 
+	End if 
+End if 
+
+
+  // ====================================================================
+  // Compare forms in database to forms in the asset table.
+If ($error_l=0)
+	
+	$numFormsInTable_l:=Size of array($formsInTable_at)
+	
+	  // If there are no forms in the table, they haven't been exported yet.
+	If ($numFormsInTable_l>0)
+		
+		$currentForm_l:=1
+		
+		  // Loop over each form to check...
+		  // See notes at the end of this method.
+		While (($currentForm_l<=$numFormsInTable_l) & ($error_l=0))
+			
+			$currentFormPath_t:=$formsInTable_at{$currentForm_l}
+			
+			  // ====================================================================
+			  // See if the form still exists in the database.
+			$pos_l:=Find in array($formsInDatabase_at;$currentFormPath_t)
+			If ($pos_l>0)
+				$formExists_f:=True
+			Else 
+				$formExists_f:=False
+			End if 
+			  // ====================================================================
+			
+			If (Not($formExists_f))
+				  // The form no longer exists in the database, mark it for delete.
+				$newAction_t:=<>VC_ACTION_Delete_t
+				UTIL_ERR_HandlerInstall 
+				Begin SQL
+					UPDATE VC_Assets
+					SET action = :$newAction_t
+					WHERE path = :$currentFormPath_t
+					AND type = :[<>VC_TYPE_Form_t];
+				End SQL
+				$error_l:=UTIL_ERR_HandlerRemove 
+			End if 
+			
+			  // Only increment if there was no error (in case I want to refer back to where I failed).
+			If ($error_l=0)
+				$currentForm_l:=$currentForm_l+1
+			End if 
+			
+		End while 
+		
+	End if 
+	
+End if 
+
+  // Close external database.
+$error_l:=VC_EXT_Close ($error_l)
+
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+
+  // I tried three different implementations to test if forms have been deleted, in an attempt to optimize for speed.
+  //
+  //   -The one you see now.
+  //   -The one you see now but sorting the arrays before performing the comparison and after each match move the start position forward (so the next find in array is shorter in theory).
+  //   -A completely different setup where I put the arrays in a BLOB, calculated a digest, and used the deigest to detect if there were any diffences.
+  //
+  //   The one you see now was the fastest.  All the supposed optimizations failed to make it faster.  IMPORTANT: even using the digest technique where most of the time there really are no differences was slower than just checking the entire array.

@@ -1,0 +1,37 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"executedOnServer":true,"folder":"VC_Framework External Database","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 10/15/12, 16:34:22
+  // ----------------------------------------------------
+  // Description:
+  //   Debugging method for checking the data in the
+  //   VC_Assets table.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($0;$data_t)
+C_LONGINT($error_l)
+
+ARRAY TEXT($ids_at;0)
+ARRAY TEXT($paths_at;0)
+ARRAY TEXT($actions_at;0)
+ARRAY TEXT($states_at;0)
+
+UTIL_ERR_Startup 
+
+$error_l:=VC_EXT_Open 
+Begin SQL
+	SELECT ID, path, action, state
+	FROM VC_Assets
+	INTO :$ids_at, :$paths_at, :$actions_at, :$states_at;
+End SQL
+$error_l:=VC_EXT_Close ($error_l)
+
+If ($error_l=0)
+	UTIL_ARRAY_TableAddColumn (->$data_t;->$ids_at)
+	UTIL_ARRAY_TableAddColumn (->$data_t;->$paths_at)
+	UTIL_ARRAY_TableAddColumn (->$data_t;->$actions_at)
+	UTIL_ARRAY_TableAddColumn (->$data_t;->$states_at)
+Else 
+	$data_t:="There was an error: "+String($error_l)+" "+UTIL_ERR_GetErrorMessage ($error_l)
+End if 
+
+$0:=$data_t

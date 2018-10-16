@@ -1,0 +1,38 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"folder":"VC_Framework Startup","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/02/12, 17:57:13
+  // ----------------------------------------------------
+  // Description:
+  //   Generic method to handle on_save, on_load, on_close,
+  //   and on_create macro events.
+  //
+  //   The goal here is the make the setup painless for
+  //   the user.  If they open, close, edit, or create a
+  //   method the component setup code will run.  Note
+  //   that when launching the database if a method
+  //   was left open, the macro runs.
+  //
+  //   Because of this no code changes need to be made to
+  //   the host database at all and to uninstall the
+  //   component you just delete it.
+  //
+  //   Reminder: 4D only supports one macro call at a time.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$methodPath_t)  // Not actually used (yet).
+
+C_BOOLEAN(<>VC_Enabled_f)
+
+  // If not enabled locally, need to check with the server.
+If (Not(<>VC_Enabled_f))
+	  // Note: this is a call to the server in client-server.
+	  // Save the value locally in an interprocess var so it
+	  // doesn't make a server roundtrip for every macro call,
+	  // once it's enabled.
+	<>VC_Enabled_f:=VC_UTIL_GetEnabled 
+End if 
+
+  // Only run the startup code if VC_Framework is not enabled.
+If (Not(<>VC_Enabled_f))
+	VC_STARTUP 
+End if 

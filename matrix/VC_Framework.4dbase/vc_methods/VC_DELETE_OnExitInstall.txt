@@ -1,0 +1,73 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 01/15/14, 15:16:38
+  // ----------------------------------------------------
+  // Description:
+  //   Install code in the On Exit Database Method to
+  //   deal with deleted methods.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($0;$error_l)
+
+C_BOOLEAN($okToSet_f)
+C_TEXT($pathToOnExit_t;$OnExit_t;$deleteOnExitCode_t;$lf_t)
+
+$lf_t:=Char(Line feed)
+$okToSet_f:=True
+
+$pathToOnExit_t:="[databaseMethod]/onExit"
+
+$deleteOnExitCode_t:=$lf_t
+$deleteOnExitCode_t:=$deleteOnExitCode_t+$lf_t
+$deleteOnExitCode_t:=$deleteOnExitCode_t+"//=== Begin VC_Framework code to delete methods on exit. ==="+$lf_t
+$deleteOnExitCode_t:=$deleteOnExitCode_t+"C_LONGINT($vc_found_l)"+$lf_t
+$deleteOnExitCode_t:=$deleteOnExitCode_t+"ARRAY TEXT($vc_components_at;0)"+$lf_t
+$deleteOnExitCode_t:=$deleteOnExitCode_t+"COMPONENT LIST($vc_components_at)"+$lf_t
+$deleteOnExitCode_t:=$deleteOnExitCode_t+"$vc_found_l:=Find in array($vc_components_at;\"VC_Framework\")"+$lf_t
+$deleteOnExitCode_t:=$deleteOnExitCode_t+"If ($vc_found_l>0)"+$lf_t
+$deleteOnExitCode_t:=$deleteOnExitCode_t+"EXECUTE METHOD(\"VC_DELETE_OnExit\")"+$lf_t
+$deleteOnExitCode_t:=$deleteOnExitCode_t+"End if "+$lf_t
+$deleteOnExitCode_t:=$deleteOnExitCode_t+"//=== End VC_Framework code to delete methods on exit. ==="+$lf_t
+$deleteOnExitCode_t:=$deleteOnExitCode_t+$lf_t
+
+
+ON ERR CALL("UTIL_ERR_GenericHandler")
+METHOD GET CODE($pathToOnExit_t;$OnExit_t;*)
+ON ERR CALL("")
+
+
+  // Make sure it's not already installed
+If (Position("VC_DELETE_OnExit";$OnExit_t)=0)
+	
+	Case of 
+		: (UTIL_ERR_4DError_l=0)
+			  // The On Exit database method already exists.
+			
+			  // 4D puts attributes on the first line so I need to skip that line.
+			  // I want this code at the beginning of On Exit to make sure it runs;
+			  // it's possible to force 4D to quit and interrupt the On Exit code.
+			$OnExit_t:=Insert string($OnExit_t;$deleteOnExitCode_t;Position(Char(Carriage return);$OnExit_t)+1)
+			
+		: (UTIL_ERR_4DError_l=-9768)
+			  // If it doesn't exist that's ok.
+			$OnExit_t:=$deleteOnExitCode_t
+			
+		Else 
+			  // METHOD GET CODE encountered an error I was not expecting.
+			$okToSet_f:=False
+	End case 
+	
+	If ($okToSet_f)
+		METHOD SET CODE($pathToOnExit_t;$OnExit_t;*)
+	Else 
+		$error_l:=UTIL_ERR_4DError_l
+	End if 
+	
+End if 
+
+If ($error_l#0)
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+$0:=$error_l
+

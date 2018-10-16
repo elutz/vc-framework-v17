@@ -1,0 +1,67 @@
+﻿  //%attributes = {"invisible":true,"folder":"Generic Methods","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 11/30/11, 14:09:46
+  // ----------------------------------------------------
+  // Description:
+  //   Generic code to append arrays onto tab-delimited
+  //   text.
+  //
+  //   $1 should contain tab delimited text data with the
+  //   same number of rows as the array in $2 (this is not
+  //   checked, so you'll get wacky results if you don't
+  //   honor this).
+  // --[HEADEREND]---------------------------------------
+C_POINTER($1;$TheTable_p_t)
+C_POINTER($2;$pArray_p)
+
+C_TEXT($buffer_t;$colDelim_t;$rowDelim_t;$newCell_t)
+C_LONGINT($i;$numRows_l;$pos_l;$colType_l)
+
+$TheTable_p_t:=$1
+$pArray_p:=$2
+
+$colType_l:=Type($pArray_p->)
+
+  // Can't convert pictures to strings...
+If ($colType_l#Picture array)
+	
+	$colDelim_t:=Char(Tab)
+	$rowDelim_t:=Char(Carriage return)
+	$numRows_l:=Size of array($pArray_p->)
+	$buffer_t:=$TheTable_p_t->
+	$TheTable_p_t->:=""
+	
+	For ($i;1;$numRows_l)
+		
+		  // Store the new cell value in a variable for easier reading.
+		$newCell_t:=String($pArray_p->{$i})
+		
+		If ($buffer_t#"")
+			  // Not First Column
+			  //   Look for the next row delimeter.
+			$pos_l:=Position($rowDelim_t;$buffer_t)
+			If ($pos_l#0)
+				  //   Insert previous row, without end of line.
+				$TheTable_p_t->:=$TheTable_p_t->+Substring($buffer_t;1;$pos_l-1)
+				$buffer_t:=Substring($buffer_t;$pos_l+1)
+			Else 
+				  // Either there is only 1 row, or this is the last row, just insert it.
+				$TheTable_p_t->:=$TheTable_p_t->+$buffer_t
+			End if 
+			
+			  // Insert tab.
+			$TheTable_p_t->:=$TheTable_p_t->+$colDelim_t
+		End if 
+		
+		  // Insert the new value.
+		$TheTable_p_t->:=$TheTable_p_t->+$newCell_t
+		
+		  // Insert end of line.
+		If ($i<$numRows_l)
+			$TheTable_p_t->:=$TheTable_p_t->+$rowDelim_t
+		End if 
+		
+	End for 
+	
+End if 

@@ -1,0 +1,41 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 07/17/14, 17:46:51
+  // ----------------------------------------------------
+  // Description:
+  //   This is a form analog of the METHOD GET PATH
+  //   command.
+  //
+  //   Given a form name and table number (optional)
+  //   create a POSIX-compliant "path" to that form.
+  // --[HEADEREND]---------------------------------------
+C_TEXT($1;$formName_t)
+C_LONGINT($2;$tableNum_l)
+
+C_TEXT($0;$formPOSIXPath_t)
+
+C_POINTER($table_p)
+C_TEXT($tableName_t;$formFolder_t)
+
+$formName_t:=$1
+
+If (Count parameters>=2)
+	$tableNum_l:=$2
+Else 
+	$tableNum_l:=0
+End if 
+
+If ($tableNum_l#0)
+	  // Table form.
+	$table_p:=Table($tableNum_l)
+	$tableName_t:=Table name($table_p)
+	$formFolder_t:=$tableName_t+"/"  // use POSIX paths unless I'm dealing with files.
+Else 
+	  // Project form.
+	$formFolder_t:=""
+End if 
+
+$formPOSIXPath_t:=$formFolder_t+$formName_t
+
+$0:=$formPOSIXPath_t

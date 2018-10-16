@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+   <!--Translation file.This file is distributed under the same license as the product package.-->
+<xliff version="1.0">
+   <file datatype="x-STR#" original="undefined" source-language="en" target-language="en">
+      <header>
+         <prop-group name="Xliff-Editor.4dbase">
+            <prop prop-type="version">1.0</prop>
+         </prop-group>
+      </header>
+      <body>
+         <group id="1000" resname="Titles">
+            <trans-unit id="1" resname="WarnSlowDelete">
+               <source>Slow Deletion Detection!</source>
+               <target>Slow Deletion Detection!</target>
+            </trans-unit>
+         </group>
+         <group id="1001" resname="Headers">
+            <trans-unit id="2" resname="WarnUserChoice">
+               <source>What would you like to do?</source>
+               <target>What would you like to do?</target>
+            </trans-unit>
+         </group>
+         <group id="1002" resname="Labels">
+            <trans-unit id="3" resname="RadioButtonIgnoreOnce">
+               <source>Ignore for this session.</source>
+               <target>Ignore for this session.</target>
+            </trans-unit>
+            <trans-unit id="4" resname="RadioButtonIgnoreAlways">
+               <source>Ignore permanently.</source>
+               <target>Ignore permanently.</target>
+            </trans-unit>
+            <trans-unit id="5" resname="RadioButtonDeleteOnExit">
+               <source>Handle Delete during On Exit.</source>
+               <target>Handle Delete during On Exit.</target>
+            </trans-unit>
+            <trans-unit id="10" resname="RadioButtonDeleteOnChange">
+               <source>Delete only on change.</source>
+               <target>Delete only on change.</target>
+            </trans-unit>
+         </group>
+         <group id="1003" resname="Messages">
+            <trans-unit id="6" resname="WarnSlowDeleteMessage">
+               <source>VC_Framework can delete exported methods that you delete in 4D in real time. This is normally done every &lt;!--#4DTEXT String(&lt;&gt;VC_DeleteProcDelay_l/60)--&gt; seconds. However because of the complexity of your database, you may perceive a ~&lt;!--#4DTEXT VC_DELETE_Average_t--&gt;ms hang in design mode every &lt;!--#4DTEXT String(&lt;&gt;VC_DeleteProcDelay_l/60)--&gt; seconds. Alternatively VC_Framework can run the delete code only when the database stamp changes, instead of real time.</source>
+               <target>VC_Framework can delete exported methods that you delete in 4D in real time. This is normally done every &lt;!--#4DTEXT String(&lt;&gt;VC_DeleteProcDelay_l/60)--&gt; seconds. However because of the complexity of your database, you may perceive a ~&lt;!--#4DTEXT VC_DELETE_Average_t--&gt;ms hang in design mode every &lt;!--#4DTEXT String(&lt;&gt;VC_DeleteProcDelay_l/60)--&gt; seconds. Alternatively VC_Framework can run the delete code only when the database stamp changes, instead of real time.</target>
+            </trans-unit>
+         </group>
+      </body>
+   </file>
+</xliff>

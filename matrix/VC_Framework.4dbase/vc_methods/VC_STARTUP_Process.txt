@@ -1,0 +1,147 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/04/12, 12:34:05
+  // ----------------------------------------------------
+  // Description:
+  //   Startup code for the component.
+  //
+  //   Important note: most of this code should only run
+  //   once per session.
+  //
+  //   Note: by the time the code gets here, the flag
+  //   <>VC_StartupExecuting_f has been set.
+  // --[HEADEREND]---------------------------------------
+C_OBJECT($1;$startupParameters_o)
+
+C_LONGINT($error_l)
+C_BOOLEAN($paramsIncluded_f)
+
+$paramsIncluded_f:=(Count parameters>=1)
+If ($paramsIncluded_f)
+	$startupParameters_o:=$1
+End if 
+
+  // Set up error handling module.
+UTIL_ERR_Startup 
+
+  // In order to support migrating any change in the key of
+  // a preference, these need to be executed before VC_Clean.
+VC_STARTUP_SetPrefLabels 
+VCM_STARTUP_SetPrefLabels 
+VCF_STARTUP_SetPrefLabels 
+
+  // Set up IP vars.
+VC_STARTUP_Vars 
+
+
+  // ===================================================================================
+  // Set up the external database.
+
+If ($error_l=0)
+	$error_l:=VC_STARTUP_EXTSetup 
+End if 
+
+
+  // ===================================================================================
+  // Clean up old stuff.
+
+If ($error_l=0)
+	$error_l:=VC_CLEAN 
+End if 
+
+
+  // ===================================================================================
+  // Set up default modules.
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VC_LABEL_ExportMethods_t;"True";False)
+End if 
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VC_LABEL_ExportForms_t;"True";False)
+End if 
+
+
+  // ===================================================================================
+  // Set up default process parameters.
+
+  // Set default value for disabling the delete process.
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VC_LABEL_DeleteProcDisabled_t;"False";False)
+End if 
+
+
+  // ===================================================================================
+  // Set up default process parameters - these ones have a corresponding IP var.
+
+  // Set default delays for processes.
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VC_LABEL_ExportProcDelay_t;"60";False)
+End if 
+If ($error_l=0)
+	$error_l:=VC_EXT_PrefSet (<>VC_LABEL_DeleteProcDelay_t;"300";False)
+End if 
+
+
+  // ===================================================================================
+  // These items only run if in component mode.
+If ($error_l=0)
+	If (UTIL_IsComponent )
+		  // Nothing for now.
+	End if 
+End if 
+
+
+  // ===================================================================================
+  // Set up modules.
+
+  // Methods export.
+If ($error_l=0)
+	$error_l:=VCM_STARTUP 
+End if 
+
+  // Forms export.
+If ($error_l=0)
+	$error_l:=VCF_STARTUP 
+End if 
+
+
+  // ===================================================================================
+  // Handle custom parameters.
+If ($error_l=0)
+	If ($paramsIncluded_f)
+		$error_l:=VC_STARTUP_HandleParams ($startupParameters_o)
+	End if 
+End if 
+
+
+  // ===================================================================================
+  // Set a flag so we know everything is set up.
+If ($error_l=0)
+	<>VC_Enabled_f:=True
+End if 
+
+
+  // ===================================================================================
+  // Start background processes to monitor code changes.
+If ($error_l=0)
+	
+	  // Workaround for ACI0087902
+	  // Don't launch export processes until METHOD GET PATHS is functioning normally.
+	Repeat 
+		DELAY PROCESS(Current process;10)
+	Until (VCM_UTIL_DetectUnnamedError =False)
+	
+	VC_EXPORT_Start 
+	If (Not(VC_CONFIG_DeleteProcDisableGet ))
+		VC_DELETE_Start 
+	End if 
+End if 
+
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name;"Startup failed.")
+	<>VC_Error_f:=True
+End if 
+
+
+<>VC_StartupExecuting_f:=False

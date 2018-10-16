@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="windows-1252" standalone="no" ?>
+<!DOCTYPE macros SYSTEM "http://www.4d.com/dtd/2007/macros.dtd" >
+<macros>
+	<!-- Hidden macros that enable the component. -->
+	<macro name="VC_SaveMethod" type_ahead="false" in_menu="false" in_toolbar="false" method_event="on_save" version="2">
+		<text><method>VC_STARTUP_MacroHandler("<method_path/>")</method></text>
+	</macro>
+	<macro name="VC_LoadMethod" type_ahead="false" in_menu="false" in_toolbar="false" method_event="on_load" version="2">
+		<text><method>VC_STARTUP_MacroHandler("<method_path/>")</method></text>
+	</macro>
+	<macro name="VC_CloseMethod" type_ahead="false" in_menu="false" in_toolbar="false" method_event="on_close" version="2">
+		<text><method>VC_STARTUP_MacroHandler("<method_path/>")</method></text>
+	</macro>
+	<macro name="VC_CreateMethod" type_ahead="false" in_menu="false" in_toolbar="false" method_event="on_create" version="2">
+		<text><method>VC_STARTUP_MacroHandler("<method_path/>")</method></text>
+	</macro>
+	<!-- User usable macros to control the create/update process. -->
+	<macro name="VC_Framework: Start export process" type_ahead="false" in_menu="false" in_toolbar="true" version="2">
+		<text><method>VC_EXPORT_Start</method></text>
+	</macro>
+	<macro name="VC_Framework: Stop export process" type_ahead="false" in_menu="false" in_toolbar="true" version="2">
+		<text><method>VC_EXPORT_Stop</method></text>
+	</macro>
+	<macro name="VC_Framework: Resolve error for export process" type_ahead="false" in_menu="false" in_toolbar="true" version="2">
+		<text><method>VC_EXPORT_ResolveError</method></text>
+	</macro>
+	<!-- User usable macros to control the delete process. -->
+	<macro name="VC_Framework: Start delete process" type_ahead="false" in_menu="false" in_toolbar="true" version="2">
+		<text><method>VC_DELETE_Start</method></text>
+	</macro>
+	<macro name="VC_Framework: Stop delete process" type_ahead="false" in_menu="false" in_toolbar="true" version="2">
+		<text><method>VC_DELETE_Stop</method></text>
+	</macro>
+	<macro name="VC_Framework: Resolve error for delete process" type_ahead="false" in_menu="false" in_toolbar="true" version="2">
+		<text><method>VC_DELETE_ResolveError</method></text>
+	</macro>
+	<!-- Less common user usable macros to control the component; hidden from toolbar to ease clutter -->
+	<macro name="VC_Framework: Full Reset" type_ahead="true" in_menu="true" in_toolbar="false" version="2">
+		<text><method>VC_Reset</method></text>
+	</macro>
+	<macro name="VC_Framework: Startup Install" type_ahead="true" in_menu="true" in_toolbar="false" version="2">
+		<text>C_LONGINT($vc_found_l)
+ARRAY TEXT($vc_components_at;0)
+COMPONENT LIST($vc_components_at)
+$vc_found_l:=Find in array($vc_components_at;"VC_Framework")
+If ($vc_found_l>0)
+	EXECUTE METHOD("VC_STARTUP")
+End if</text>
+	</macro>
+        <macro name="VC_Framework: Import methods" type_ahead="false" in_menu="false" in_toolbar="true" version="2">
+                <text><method>VCM_Import</method></text>
+        </macro>
+</macros>

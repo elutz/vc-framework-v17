@@ -1,0 +1,20 @@
+﻿  //%attributes = {"invisible":true,"folder":"VC_Framework Log","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 04/25/12, 12:33:08
+  // ----------------------------------------------------
+  // Description:
+  //   If the component detects invalid asset names, a
+  //   warning is shown.
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($winRef)
+
+C_TEXT(UTIL_WARN_DialogTitle_t)
+
+UTIL_WARN_DialogTitle_t:=<>VC_COMPONENTNAME_T+" Warning!"
+
+$winRef:=Open form window("VC_LOG_Warning";Plain form window;Horizontally centered;Vertically centered)
+SET WINDOW TITLE(<>VC_COMPONENTNAME_T)
+DIALOG("VC_LOG_Warning")
+
+CLOSE WINDOW($winRef)

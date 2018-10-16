@@ -1,0 +1,39 @@
+﻿  //%attributes = {"invisible":true,"shared":true,"executedOnServer":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): jfletcher
+  // Date and time: 04/06/12, 15:01:43
+  // ----------------------------------------------------
+  // Description:
+  //   Start stored procedure to monitor deleted methods.
+  //
+  //   Note: there can be only one.
+  //   Note: executes on server.
+  //
+  //   Called by Macro (so test to see if <>VC_Enabled_f is true)
+  // --[HEADEREND]---------------------------------------
+C_LONGINT($stack_l;<>VC_DeletePID_l;$error_l)
+C_TEXT($methodName_t;$processName_t)
+
+C_BOOLEAN(<>VC_Enabled_f)
+
+UTIL_ERR_Startup 
+
+If (<>VC_Enabled_f)
+	
+	$stack_l:=1024*1024
+	$methodName_t:="VC_DELETE_Process"
+	$processName_t:=$methodName_t
+	
+	<>VC_StopDelete_f:=False
+	<>VC_DeleteProcDone_f:=False
+	
+	<>VC_DeletePID_l:=New process($methodName_t;$stack_l;$processName_t;*)
+	
+Else 
+	$error_l:=<>ERR_VC_NotEnabled_l
+	APPEND TO ARRAY(UTIL_ERR_CallChain_at;Current method name)
+End if 
+
+If ($error_l#0)
+	UTIL_ERR_HandleError ($error_l;<>VC_ComponentName_t;Current method name)
+End if 

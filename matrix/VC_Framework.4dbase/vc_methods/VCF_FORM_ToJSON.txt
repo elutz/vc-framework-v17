@@ -1,0 +1,415 @@
+﻿  //%attributes = {"invisible":true,"lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): Joshua Fletcher
+  // Date and time: 08/16/13
+  // ----------------------------------------------------
+  // Description:
+  //   Convert 4D form to JSON.
+  //
+  //   Naming convention for JSON attributes: take the 4D
+  //   name, make it camel case, remove spaces.
+  //
+  //   Underscore indicates extra info.  Example: "type"
+  //   is a property and internally has a numberic value.
+  //   "type_label" stores a text label for the type;
+  //   it's metadata.
+  //
+  //   If an attribute starts with an underscore, there is
+  //   no corresponding property in 4D.
+  //
+  //   http://google-styleguide.googlecode.com/svn/trunk/jsoncstyleguide.xml#Property_Name_Guidelines
+  // --[HEADEREND]---------------------------------------
+C_OBJECT($1;$parameterList_o)
+
+C_LONGINT($0;$error_l)
+
+C_POINTER($currentTable_p;$subformTable_p;$currentObjectPointer_p)
+C_TEXT($currentFormName_t;$currentTable_t;$windowTitle_t;$currentObjectName_t;$shortCutKey_t;$detailSubform_t;$listSubform_t;$varName_t)
+C_LONGINT($currentTable_l;$width_l;$height_l;$numPages_l;$bestWidth_l;$bestHeight_l;$foregroundColor_l;$backgroundColor_l;$altBackgrndColor_l;$shortcutModifiers_l;$variableType_l;$minimumValue_r;$minWidth_l;$maxWidth_l;$minHeight_l;$maxHeight_l;$tableNum_l;$fieldNum_l)
+C_BOOLEAN($fixedWidth_f;$fixedHeight_f;$draggable_f;$automaticDrag_f;$droppable_f;$automaticDrop_f;$printFrame_f;$horizontalScrollBar_f;$verticalScrollBar_f;$horizontalResize_f;$verticalResize_f)
+C_REAL($maximumValue_r)
+C_DATE($maximumValue_d;$minimumValue_d)
+C_TIME($maximumValue_h;$minimumValue_h)
+C_TEXT($maximumValue_t;$minimumValue_t)
+
+C_OBJECT($currentForm_o)
+C_OBJECT($currentObjects_o)
+C_OBJECT($currentObject_o)
+C_OBJECT($parameterList_o)
+
+ARRAY TEXT($objectNames_at;0)
+ARRAY POINTER($variablesArray_ap;0)
+ARRAY LONGINT($pagesArray_al;0)
+ARRAY OBJECT($formEvents_ao;0)
+ARRAY OBJECT($objectEvents_ao;0)
+
+$parameterList_o:=$1
+
+$currentFormName_t:=OB Get($parameterList_o;<>VCF_KEY_ParamFormName_t)
+$currentForm_o:=OB Get($parameterList_o;<>VCF_KEY_ParamForm_t)
+
+OB SET($currentForm_o;<>VCF_KEY_ParamFormName_t;$currentFormName_t)
+
+  // This block is to access Form Properties.
+If (OB Is defined($parameterList_o;<>VCF_KEY_ParamTableNum_t))
+	  // Table form.
+	$currentTable_l:=OB Get($parameterList_o;<>VCF_KEY_ParamTableNum_t)
+	$currentTable_p:=Table($currentTable_l)
+	$currentTable_t:=Table name($currentTable_p)
+	OB SET($currentForm_o;"_table";$currentTable_t)  // "table" isn't really a property, it's the owner, so flag this as metadata with _
+	  // FORM GET PROPERTIES does not work on a host form currently.
+	If (Not(UTIL_IsComponent ))
+		FORM GET PROPERTIES($currentTable_p->;$currentFormName_t;$width_l;$height_l;$numPages_l;$fixedWidth_f;$fixedHeight_f;$windowTitle_t)
+	End if 
+	FORM LOAD($currentTable_p->;$currentFormName_t;*)
+Else 
+	  // Project form.
+	  // FORM GET PROPERTIES does not work on a host form currently.
+	If (Not(UTIL_IsComponent ))
+		FORM GET PROPERTIES($currentFormName_t;$width_l;$height_l;$numPages_l;$fixedWidth_f;$fixedHeight_f;$windowTitle_t)
+	End if 
+	FORM LOAD($currentFormName_t;*)
+End if 
+
+
+OB SET($currentForm_o;"_width";$width_l)
+OB SET($currentForm_o;"_height";$height_l)
+OB SET($currentForm_o;"_numPages";$numPages_l)
+OB SET($currentForm_o;"_fixedWidth";$fixedWidth_f)
+OB SET($currentForm_o;"_fixedHeight";$fixedHeight_f)
+OB SET($currentForm_o;"windowTitle";$windowTitle_t)
+
+
+  // Pass empty string to get Form Events.
+  // REMINDER: if there is no form method, this command returns no events.
+VCF_OBJ_SetEvents ($currentForm_o;"")
+
+FORM GET HORIZONTAL RESIZING($horizontalResize_f;$minWidth_l;$maxWidth_l)
+FORM GET VERTICAL RESIZING($verticalResize_f;$minHeight_l;$maxHeight_l)
+
+
+OB SET($currentForm_o;"fixedWidth";Not($horizontalResize_f))
+OB SET($currentForm_o;"minWidth";$minWidth_l)
+OB SET($currentForm_o;"maxWidth";$maxWidth_l)
+OB SET($currentForm_o;"fixedHeight";Not($verticalResize_f))
+OB SET($currentForm_o;"minHeight";$minHeight_l)
+OB SET($currentForm_o;"maxHeight";$maxHeight_l)
+
+
+FORM GET OBJECTS($objectNames_at;$variablesArray_ap;$pagesArray_al)
+
+C_LONGINT($k;$numObjects_l)
+
+$numObjects_l:=Size of array($objectNames_at)
+
+  // Loop over Objects
+If ($numObjects_l>0)
+	CLEAR VARIABLE($currentObjects_o)
+	
+	For ($k;1;$numObjects_l)
+		CLEAR VARIABLE($currentObject_o)
+		
+		$currentObjectName_t:=$objectNames_at{$k}
+		
+		OB SET($currentObject_o;"objectName";$currentObjectName_t)
+		
+		  //== OBJECT Get type ========================================================
+		VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"type";$currentObject_o)
+		
+		
+		  //== OBJECT Get pointer =====================================================
+		  // This works with FORM LOAD but note I also already have a pointer to the object from FORM GET OBJECTS.
+		  // Of course I don't actually care about the pointer, I care about what it points to.
+		$currentObjectPointer_p:=OBJECT Get pointer(Object named;$currentObjectName_t)
+		If (Not(Is nil pointer($currentObjectPointer_p)))
+			RESOLVE POINTER($currentObjectPointer_p;$varName_t;$tableNum_l;$fieldNum_l)
+			Case of 
+				: ($varName_t#"")  // Variable.
+					  // If a Form Object has no value in the Variable Name property, 4D assigns 
+					  // one automatically when the form is loaded via FORM LOAD. The value 
+					  // changes every time the form is loaded. This seems somewhat useless 
+					  // information in a Revision Control context so I will ignore these values.
+					  // I would rather know that the value is blank. 
+					  // As far as I'm aware, you should never have a legitimate Object with a 
+					  // local variable name so it seems safe to filter out anything that starts 
+					  // with $ (for example 4D will use $form.34.5E).
+					If ($varName_t="$@")
+						$varName_t:=""
+					End if 
+					OB SET($currentObject_o;"variableName";$varName_t)
+					$variableType_l:=Type($currentObjectPointer_p->)  // This is used for Max/Min value later.
+					VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"variableType";$currentObject_o)
+				: ($fieldNum_l#0)  // Field.
+					OB SET($currentObject_o;"source";Table name($tableNum_l))
+					OB SET($currentObject_o;"sourceField";Field name($currentObjectPointer_p))
+					$variableType_l:=Type($currentObjectPointer_p->)  // This is used for Max/Min value later.
+					VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"_fieldType";$currentObject_o)
+				: (($tableNum_l#0) & ($fieldNum_l=0))  // Subform displaying a table.
+					OB SET($currentObject_o;"source";Table name($tableNum_l))
+					$variableType_l:=Is undefined  // This is used for Max/Min value later.
+				Else 
+					$variableType_l:=Is undefined  // This is used for Max/Min value later.
+			End case 
+		Else 
+			$variableType_l:=Is undefined  // This is used for Max/Min value later.
+		End if 
+		
+		
+		  // NOTE: The rest of the getters are accessed alphabetically.
+		
+		
+		  //== OBJECT Get action ======================================================
+		VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"action";$currentObject_o)
+		
+		
+		  //== OBJECT Get auto spellcheck =============================================
+		OB SET($currentObject_o;"autoSpellcheck";OBJECT Get auto spellcheck(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT GET BEST SIZE ===================================================
+		OBJECT GET BEST SIZE(*;$currentObjectName_t;$bestWidth_l;$bestHeight_l)
+		OB SET($currentObject_o;"width";$bestWidth_l)
+		OB SET($currentObject_o;"height";$bestHeight_l)
+		
+		
+		  //== OBJECT Get border style ================================================
+		VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"borderLineStyle";$currentObject_o)
+		
+		
+		  //== OBJECT Get context menu ================================================
+		OB SET($currentObject_o;"contextMenu";OBJECT Get context menu(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT GET COORDINATES =================================================
+		OBJECT GET COORDINATES(*;$currentObjectName_t;$left_l;$top_l;$right_l;$bottom_l)
+		OB SET($currentObject_o;"left";$left_l)
+		OB SET($currentObject_o;"top";$top_l)
+		OB SET($currentObject_o;"right";$right_l)
+		OB SET($currentObject_o;"bottom";$bottom_l)
+		
+		
+		  //== OBJECT Get data source =================================================
+		  // Doesn't do much that's useful with FORM LOAD. Variables are undefined.
+		
+		
+		  //== OBJECT GET DRAG AND DROP OPTIONS =======================================
+		OBJECT GET DRAG AND DROP OPTIONS(*;$currentObjectName_t;$draggable_f;$automaticDrag_f;$droppable_f;$automaticDrop_f)
+		OB SET($currentObject_o;"draggable";$draggable_f)
+		OB SET($currentObject_o;"automaticDrag";$automaticDrag_f)
+		OB SET($currentObject_o;"droppable";$droppable_f)
+		OB SET($currentObject_o;"automaticDrop";$automaticDrop_f)
+		
+		
+		  //== OBJECT Get enabled =====================================================
+		OB SET($currentObject_o;"enabled";OBJECT Get enabled(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get enterable ===================================================
+		OB SET($currentObject_o;"enterable";OBJECT Get enterable(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT GET EVENTS ======================================================
+		  // REMINDER: if there is no object method, this command returns no events.
+		VCF_OBJ_SetEvents ($currentObject_o;$currentObjectName_t)
+		
+		
+		  //== OBJECT Get filter ======================================================
+		OB SET($currentObject_o;"filter";OBJECT Get filter(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get focus rectangle invisible ===================================
+		OB SET($currentObject_o;"focusRectangleInvisible";OBJECT Get focus rectangle invisible(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get font ========================================================
+		OB SET($currentObject_o;"font";OBJECT Get font(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get font size ===================================================
+		OB SET($currentObject_o;"fontSize";OBJECT Get font size(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get font style ==================================================
+		OB SET($currentObject_o;"fontStyle";OBJECT Get font style(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get format ======================================================
+		OB SET($currentObject_o;"format";OBJECT Get format(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get help tip ====================================================
+		OB SET($currentObject_o;"helpTip";OBJECT Get help tip(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get horizontal alignment ========================================
+		VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"horizontalAlignment";$currentObject_o)
+		
+		
+		  //== OBJECT Get indicator type ==============================================
+		VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"indicatorType";$currentObject_o)
+		
+		
+		  //== OBJECT Get keyboard layout =============================================
+		OB SET($currentObject_o;"keyboardLayout";OBJECT Get keyboard layout(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get list name ===================================================
+		OB SET($currentObject_o;"listName";OBJECT Get list name(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get list reference ==============================================
+		OB SET($currentObject_o;"choiceList";OBJECT Get list reference(*;$currentObjectName_t;Choice list))
+		OB SET($currentObject_o;"requiredList";OBJECT Get list reference(*;$currentObjectName_t;Required list))
+		OB SET($currentObject_o;"excludedList";OBJECT Get list reference(*;$currentObjectName_t;Excluded list))
+		
+		
+		  //== OBJECT GET MAXIMUM VALUE ===============================================
+		Case of 
+			: (($variableType_l=Is text) | ($variableType_l=Is alpha field))
+				OBJECT GET MAXIMUM VALUE(*;$currentObjectName_t;$maximumValue_t)
+				OB SET($currentObject_o;"maximumValue";$maximumValue_t)
+			: ($variableType_l=Is date)
+				OBJECT GET MAXIMUM VALUE(*;$currentObjectName_t;$maximumValue_d)
+				OB SET($currentObject_o;"maximumValue";$maximumValue_d)
+			: ($variableType_l=Is time)
+				OBJECT GET MAXIMUM VALUE(*;$currentObjectName_t;$maximumValue_h)
+				OB SET($currentObject_o;"maximumValue";$maximumValue_h)
+			Else 
+				OBJECT GET MAXIMUM VALUE(*;$currentObjectName_t;$maximumValue_r)
+				OB SET($currentObject_o;"maximumValue";$maximumValue_r)
+		End case 
+		
+		
+		  //== OBJECT GET MINIMUM VALUE ===============================================
+		Case of 
+			: (($variableType_l=Is text) | ($variableType_l=Is alpha field))
+				OBJECT GET MINIMUM VALUE(*;$currentObjectName_t;$minimumValue_t)
+				OB SET($currentObject_o;"minimumValue";$minimumValue_t)
+			: ($variableType_l=Is date)
+				OBJECT GET MINIMUM VALUE(*;$currentObjectName_t;$minimumValue_d)
+				OB SET($currentObject_o;"minimumValue";$minimumValue_d)
+			: ($variableType_l=Is time)
+				OBJECT GET MINIMUM VALUE(*;$currentObjectName_t;$minimumValue_h)
+				OB SET($currentObject_o;"minimumValue";$minimumValue_h)
+			Else 
+				OBJECT GET MINIMUM VALUE(*;$currentObjectName_t;$minimumValue_r)
+				OB SET($currentObject_o;"minimumValue";$minimumValue_r)
+		End case 
+		
+		
+		  //== OBJECT Get name ========================================================
+		  // Does not work with FORM LOAD
+		
+		
+		  //== OBJECT Get placeholder =================================================
+		OB SET($currentObject_o;"placeholder";OBJECT Get placeholder(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT GET PRINT VARIABLE FRAME ========================================
+		OBJECT GET PRINT VARIABLE FRAME(*;$currentObjectName_t;$printFrame_f)
+		OB SET($currentObject_o;"printFrame";$printFrame_f)
+		VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"subformPrintFrame";$currentObject_o)
+		
+		
+		  //== OBJECT GET RESIZING OPTIONS ============================================
+		VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"horizontalSizing";$currentObject_o)
+		VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"verticalSizing";$currentObject_o)
+		
+		
+		  //== OBJECT GET RGB COLORS ==================================================
+		  // I want to make this useful as a pure text file, but it's a trade-off in terms of proper object design.
+		  // If the value is negative, I save the 4D constant value and therefore also display a label.
+		  // If the value is positive I use the 0x00RRGGBB hex template as a "label".
+		OBJECT GET RGB COLORS(*;$currentObjectName_t;$foregroundColor_l;$backgroundColor_l;$altBackgrndColor_l)
+		If ($foregroundColor_l<0)
+			VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"foregroundColor";$currentObject_o)
+		Else 
+			OB SET($currentObject_o;"foregroundColor";$foregroundColor_l)
+			OB SET($currentObject_o;"foregroundColor_hex";UTIL_CONV_RGBColorToText ($foregroundColor_l))
+		End if 
+		If ($backgroundColor_l<0)
+			VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"backgroundColor";$currentObject_o)
+		Else 
+			OB SET($currentObject_o;"backgroundColor";$backgroundColor_l)
+			OB SET($currentObject_o;"backgroundColor_hex";UTIL_CONV_RGBColorToText ($backgroundColor_l))
+		End if 
+		If ($altBackgrndColor_l<0)
+			VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"altBackgroundColor";$currentObject_o)
+		Else 
+			OB SET($currentObject_o;"altBackgroundColor";$altBackgrndColor_l)
+			OB SET($currentObject_o;"altBackgroundColor_hex";UTIL_CONV_RGBColorToText ($altBackgrndColor_l))
+		End if 
+		
+		
+		  //== OBJECT GET SCROLL POSITION =============================================
+		  // I don't think it makes to use this one if the form isn't being rendered. It also crashes 4D (ACI0083478, fixed after build 139873).
+		  // OBJECT GET SCROLL POSITION(*;$currentObjectName_t;$verticalPosition_l;$horizontalPosition_l)
+		
+		
+		  //== OBJECT GET SCROLLBAR ===================================================
+		OBJECT GET SCROLLBAR(*;$currentObjectName_t;$horizontalScrollBar_f;$verticalScrollBar_f)
+		OB SET($currentObject_o;"horizontalScrollBar";$horizontalScrollBar_f)
+		OB SET($currentObject_o;"verticalScrollBar";$verticalScrollBar_f)
+		
+		
+		  //== OBJECT GET SHORTCUT =============================================
+		OBJECT GET SHORTCUT(*;$currentObjectName_t;$shortCutKey_t;$shortcutModifiers_l)  // 4th param no longer optional (ACI0083479)
+		OB SET($currentObject_o;"shortcutKey";$shortCutKey_t)
+		If ($shortcutModifiers_l>0)
+			VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"shortcutKeyModifiers";$currentObject_o)
+		Else 
+			OB SET($currentObject_o;"shortcutModifiers";$shortcutModifiers_l)
+		End if 
+		
+		
+		  //== OBJECT Get style sheet =============================================
+		OB SET($currentObject_o;"styleSheet";OBJECT Get style sheet(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT GET SUBFORM =============================================
+		OBJECT GET SUBFORM(*;$currentObjectName_t;$subformTable_p;$detailSubform_t;$listSubform_t)
+		If (Not(Is nil pointer($subformTable_p)))
+			OB SET($currentObject_o;"source";Table name($subformTable_p))
+			OB SET($currentObject_o;"listForm";$listSubform_t)
+			OB SET($currentObject_o;"detailForm";$detailSubform_t)
+		End if 
+		
+		
+		  //== OBJECT GET SUBFORM CONTAINER SIZE ======================================
+		  // Does not work with FORM LOAD, requires a "current object".
+		
+		
+		  //== OBJECT Get text orientation ============================================
+		OB SET($currentObject_o;"orientation";OBJECT Get text orientation(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get three states checkbox =======================================
+		OB SET($currentObject_o;"threeStates";OBJECT Get three states checkbox(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get title =======================================================
+		OB SET($currentObject_o;"title";OBJECT Get title(*;$currentObjectName_t))
+		
+		
+		  //== OBJECT Get vertical alignment =============================================
+		VCF_OBJ_SetPropWithLabel ($currentObjectName_t;"verticalAlignment";$currentObject_o)
+		
+		
+		  //== OBJECT Get visible =====================================================
+		OB SET($currentObject_o;"visible";OBJECT Get visible(*;$currentObjectName_t))
+		
+		
+		  // All done!
+		OB SET($currentObjects_o;$currentObjectName_t;$currentObject_o)
+		
+	End for   // End loop over objects
+	
+	  // Add the objects to the form.
+	OB SET($currentForm_o;"objects";$currentObjects_o)
+	
+	
+End if   // make sure there are some objects to save.
+
+FORM UNLOAD
+
+$0:=$error_l

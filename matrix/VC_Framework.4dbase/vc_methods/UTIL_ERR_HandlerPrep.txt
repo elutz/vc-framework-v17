@@ -1,0 +1,26 @@
+﻿  //%attributes = {"invisible":true,"folder":"Error Handling","lang":"en"} comment added and reserved by 4D.
+  // --[HEADERSTART]-------------------------------------
+  // User name (OS): jfletcher
+  // Date and time: 04/05/12, 16:31:44
+  // ----------------------------------------------------
+  // Description:
+  //   Initialize variables for generic error handler.
+  //
+  //   WARNING: clears any previous values.
+  // --[HEADEREND]---------------------------------------
+C_TEXT(UTIL_ERR_GenericHandler_t)
+
+UTIL_ERR_GenericHandler_t:="UTIL_ERR_GenericHandler"
+
+  // These variables track internal 4D error data.
+C_LONGINT(UTIL_ERR_4DError_l)
+C_TEXT(UTIL_ERR_4DErrorMethod_t)
+C_LONGINT(UTIL_ERR_4DErrorLine_l)
+
+ARRAY LONGINT(UTIL_ERR_4DStackCodes_al;0)
+ARRAY TEXT(UTIL_ERR_4DStackComp_at;0)
+ARRAY TEXT(UTIL_ERR_4DStackErrors_at;0)
+
+UTIL_ERR_4DError_l:=0
+UTIL_ERR_4DErrorMethod_t:=""
+UTIL_ERR_4DErrorLine_l:=0

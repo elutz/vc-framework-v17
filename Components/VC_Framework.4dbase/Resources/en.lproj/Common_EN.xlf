@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+   <!--
+Translation file.
+This file is distributed under the same license as the product package.-->
+<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN"
+"http://www.oasis-open.org/committees/xliff/documents/xliff.dtd">
+<xliff version="1.0">
+   <file datatype="x-STR#" original="undefined" source-language="en" target-language="en">
+      <header>
+         <prop-group name="Xliff-Editor.4dbase">
+            <prop prop-type="version">1.0</prop>
+         </prop-group>
+      </header>
+      <body>
+         <group id="9" resname="Buttons">
+            <trans-unit id="1" resname="OKButton">
+               <source>OK</source>
+               <target>OK</target>
+            </trans-unit>
+         </group>
+      </body>
+   </file>
+</xliff>
